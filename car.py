@@ -1,5 +1,5 @@
 from pos import Pos
-from Location import Location
+from location import Location
 # Represents a Car in the traffic simulation
 class Car:
     def __init__(self, curr_pos: Pos, on_side: Location, source: Pos, dest: Pos):

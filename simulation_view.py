@@ -1,6 +1,6 @@
 import pygame
 import time
-from Location import Location
+from location import Location
 from traffic_simulation import TrafficSimulation
 
 #CONSTANTS
