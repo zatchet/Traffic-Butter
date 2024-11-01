@@ -81,7 +81,10 @@ class TrafficSimulation:
 
     def result(self):
         return math.avg(self.times)
-        
+    
+    def done(self):
+        return all(not math.inf == i for i in self.times)
+
 
     # place cars randomly on the map
     def place_random_cars(self, num_of_cars):
