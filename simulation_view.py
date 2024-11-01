@@ -36,7 +36,7 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 # Represents all information to rendering the game
 class GameLoop:
     def __init__(self):
-        self.traffic_simulation = TrafficSimulation(matrix=random_intersection_placement(9, 9))
+        self.traffic_simulation = TrafficSimulation(matrix=random_intersection_placement(9, 9), stop_light_duration=1.5)
         self.screen_height = cellSize * self.traffic_simulation.height
         self.screen_width = cellSize * self.traffic_simulation.width
 
@@ -59,9 +59,13 @@ class GameLoop:
     def draw_intersection_elements(self, screen):
         for y in range(0, len(self.traffic_simulation.matrix)):
             for x in range(0, len(self.traffic_simulation.matrix[0])):
-                if type(self.traffic_simulation.matrix[y][x]) == StopLight:
-                    pygame.draw.circle(screen, green, ((x*cellSize),(y * cellSize)), 4)
-                if type(self.traffic_simulation.matrix[y][x]) == StopSign:
+                intersection = self.traffic_simulation.matrix[y][x]
+                if type(intersection) == StopLight:
+                    pygame.draw.circle(screen, green if not intersection.y_axis_green else red, ((x*cellSize) - 5,(y * cellSize)), 4)
+                    pygame.draw.circle(screen, green if not intersection.y_axis_green else red, ((x*cellSize) + 5,(y * cellSize)), 4)
+                    pygame.draw.circle(screen, green if intersection.y_axis_green else red, ((x*cellSize),(y * cellSize) - 5), 4)
+                    pygame.draw.circle(screen, green if intersection.y_axis_green else red, ((x*cellSize),(y * cellSize) + 5), 4)
+                if type(intersection) == StopSign:
                     rect = pygame.Rect((x*cellSize)-4,(y*cellSize)-4,8,8)
                     pygame.draw.rect(screen, red, rect)
 
@@ -86,6 +90,8 @@ class GameLoop:
         clock = pygame.time.Clock()
         self.refresh(screen)
 
+        MOVEEVENT, t, trail = pygame.USEREVENT+1, 250, []
+        pygame.time.set_timer(MOVEEVENT, t, 0)
         running = True
         while running:
             self.draw_city(screen)
@@ -93,6 +99,8 @@ class GameLoop:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                if event.type == MOVEEVENT:
+                    self.refresh(screen)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         running = False
@@ -104,6 +112,8 @@ class GameLoop:
                         self.traffic_simulation.move_car(0, Location(0))
                     elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
                         self.traffic_simulation.move_car(0, Location(1))
+            
+            self.traffic_simulation.car_at_destination(0)
             self.refresh(screen)
             pygame.display.flip()
             clock.tick(fps)
