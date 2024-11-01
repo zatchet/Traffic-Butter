@@ -27,7 +27,6 @@ class TrafficSimulation:
 
         self.setup_thread_for_light_toggle()
 
-
     def move_car(self, car_index: int, direction: Location):
         if car_index >= len(self.cars):
             raise Exception("move_car: Invalid index of car")
@@ -47,7 +46,17 @@ class TrafficSimulation:
             if not intersection.y_axis_green and (direction == Location.up or direction == Location.down):
                 print('attempting to move at a red light')
                 return
-            
+            self.move_car_to_next_intersection(car_index, direction)
+        else:
+            intersection.join_queue(car_index, direction, self)
+                    
+
+    def move_car_to_next_intersection(self, car_index, direction):
+        car = self.cars[car_index]
+        curr_position = car.curr_pos
+        direction_math = direction.math_dirs()
+        new_x = curr_position.x + direction_math[0]
+        new_y = curr_position.y + direction_math[1]
 
         new_position = Pos(new_x, new_y)
         car.on_side = direction
@@ -71,7 +80,7 @@ class TrafficSimulation:
             self.times[index] = time_to_dest
 
     def result(self):
-        math.avg(self.times)
+        return math.avg(self.times)
         
 
     # place cars randomly on the map

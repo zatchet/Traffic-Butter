@@ -39,6 +39,7 @@ class GameLoop:
         self.traffic_simulation = TrafficSimulation(matrix=random_intersection_placement(9, 9), stop_light_duration=1.5)
         self.screen_height = cellSize * self.traffic_simulation.height
         self.screen_width = cellSize * self.traffic_simulation.width
+        self.car_index = 0
 
     def drawGrid(self, screen):
         for y in range(0, self.screen_height, cellSize):
@@ -47,14 +48,14 @@ class GameLoop:
                 pygame.draw.rect(screen, black, rect, 1)   
 
     def drawCars(self, screen):
-        for car in self.traffic_simulation.cars:
+        for i, car in enumerate(self.traffic_simulation.cars):
             x = car.curr_pos.x
             y = car.curr_pos.y
             location = car.on_side
             dir_val_x = location.math_dirs()[0]
             dir_val_y = location.math_dirs()[1]
             rect = pygame.Rect((x*cellSize) + (0 if (dir_val_x >= 0) else -20), (y*cellSize) + (0 if (dir_val_y >= 0) else -20), 20 + (-abs(dir_val_y)*10) , 20 + (-abs(dir_val_x)*10))
-            pygame.draw.rect(screen, car.color, rect, 5)
+            pygame.draw.rect(screen, car.color, rect, 4 if i == self.car_index else 10)
 
     def draw_intersection_elements(self, screen):
         for y in range(0, len(self.traffic_simulation.matrix)):
@@ -69,7 +70,6 @@ class GameLoop:
                     rect = pygame.Rect((x*cellSize)-4,(y*cellSize)-4,8,8)
                     pygame.draw.rect(screen, red, rect)
 
-        #for 
     # begins the simuation
     def start(self):
         self.loop_gui()
@@ -82,7 +82,7 @@ class GameLoop:
         self.drawGrid(screen)
         self.drawCars(screen)
         self.draw_intersection_elements(screen)
-
+    
     def loop_gui(self):
         pygame.init()
         screen = pygame.display.set_mode((self.screen_height, self.screen_width))
@@ -105,18 +105,22 @@ class GameLoop:
                     if event.key == pygame.K_q:
                         running = False
                     elif event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                        self.traffic_simulation.move_car(0, Location(2))
+                        self.traffic_simulation.move_car(self.car_index, Location(2))
                     elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                        self.traffic_simulation.move_car(0, Location(3))
+                        self.traffic_simulation.move_car(self.car_index, Location(3))
                     elif event.key == pygame.K_w or event.key == pygame.K_UP:
-                        self.traffic_simulation.move_car(0, Location(0))
+                        self.traffic_simulation.move_car(self.car_index, Location(0))
                     elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                        self.traffic_simulation.move_car(0, Location(1))
+                        self.traffic_simulation.move_car(self.car_index, Location(1))
+                    elif event.key == pygame.K_h:
+                        self.car_index = (self.car_index + 1) % len(self.traffic_simulation.cars) 
+
             
-            self.traffic_simulation.car_at_destination(0)
+            self.traffic_simulation.car_at_destination(self.car_index)
             self.refresh(screen)
             pygame.display.flip()
             clock.tick(fps)
+        print(f"{self.traffic_simulation.result()}: average time to destination")
         pygame.quit()
 
 
