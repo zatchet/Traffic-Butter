@@ -1,11 +1,12 @@
+from typing import Tuple
 from pos import Pos
 from location import Location
 # Represents a Car in the traffic simulation
 class Car:
-    def __init__(self, curr_pos: Pos, on_side: Location, source: Pos, dest: Pos):
+    def __init__(self, curr_pos: Pos, on_side: Location, source: Pos, dest: Pos, color: Tuple[int]):
         self.curr_pos = curr_pos
         self.on_side = on_side # what side of the intersection the car is on. A car is always moving out of an intersecion
-
+        self.color = color
         self.source = source
         self.dest = dest
 
