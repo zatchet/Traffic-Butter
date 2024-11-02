@@ -74,7 +74,7 @@ class TrafficSimulation:
             self.times[index] = time_to_dest
 
     def result(self):
-        return math.avg(self.times)
+        return sum(self.times) / len(self.times)
     
     def done(self):
         return all(not math.inf == i for i in self.times)
