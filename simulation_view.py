@@ -7,7 +7,8 @@ from intersection import Intersection, StopLight, StopSign
 from traffic_simulation import TrafficSimulation
 
 #CONSTANTS
-cellSize = 50 # pixels
+cellSize = 75 # pixels
+car_size = 40
 black = (0, 0, 0)
 
 white = (255, 255, 255)
@@ -29,8 +30,6 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
                 matrix[y][x] = StopLight()
             else:
                 matrix[y][x] = StopSign()
-    print(matrix)
-    print("")
     return matrix 
        
 # Represents all information to rendering the game
@@ -54,20 +53,29 @@ class GameLoop:
             location = car.on_side
             dir_val_x = location.math_dirs()[0]
             dir_val_y = location.math_dirs()[1]
-            rect = pygame.Rect((x*cellSize) + (0 if (dir_val_x >= 0) else -20), (y*cellSize) + (0 if (dir_val_y >= 0) else -20), 20 + (-abs(dir_val_y)*10) , 20 + (-abs(dir_val_x)*10))
-            pygame.draw.rect(screen, car.color, rect, 4 if i == self.car_index else 10)
+            rect = pygame.Rect((x*cellSize) + (0 if (dir_val_x >= 0) else -car_size), 
+                               (y*cellSize) + (0 if (dir_val_y >= 0) else -car_size), 
+                               car_size + (-abs(dir_val_y)*(car_size/2)), 
+                               car_size + (-abs(dir_val_x)*(car_size/2)))
+            pygame.draw.rect(screen, car.color, rect, 4 if i == self.car_index else 0)
+            pygame.draw.circle(screen, car.color,(((x*cellSize) + (dir_val_x*(car_size*1.25))+ ((car_size/4) if dir_val_x == 0 else 0)), 
+                                                  ((y*cellSize) + (dir_val_y*(car_size*1.25))+ ((car_size/4) if dir_val_y == 0 else 0))), 
+                                                  (car_size/4))
 
     def draw_intersection_elements(self, screen):
         for y in range(0, len(self.traffic_simulation.matrix)):
             for x in range(0, len(self.traffic_simulation.matrix[0])):
                 intersection = self.traffic_simulation.matrix[y][x]
                 if type(intersection) == StopLight:
-                    pygame.draw.circle(screen, green if not intersection.y_axis_green else red, ((x*cellSize) - 5,(y * cellSize)), 4)
-                    pygame.draw.circle(screen, green if not intersection.y_axis_green else red, ((x*cellSize) + 5,(y * cellSize)), 4)
-                    pygame.draw.circle(screen, green if intersection.y_axis_green else red, ((x*cellSize),(y * cellSize) - 5), 4)
-                    pygame.draw.circle(screen, green if intersection.y_axis_green else red, ((x*cellSize),(y * cellSize) + 5), 4)
+                    pygame.draw.circle(screen, green if not intersection.y_axis_green else red, ((x*cellSize) - 8,(y * cellSize)), 5)
+                    pygame.draw.circle(screen, green if not intersection.y_axis_green else red, ((x*cellSize) + 8,(y * cellSize)), 5)
+                    pygame.draw.circle(screen, green if intersection.y_axis_green else red, ((x*cellSize),(y * cellSize) - 8), 5)
+                    pygame.draw.circle(screen, green if intersection.y_axis_green else red, ((x*cellSize),(y * cellSize) + 8), 5)
                 if type(intersection) == StopSign:
-                    rect = pygame.Rect((x*cellSize)-4,(y*cellSize)-4,8,8)
+                    rect = pygame.Rect((x*cellSize)-4,
+                                       (y*cellSize)-4,
+                                       10,
+                                       10)
                     pygame.draw.rect(screen, red, rect)
 
     # begins the simuation

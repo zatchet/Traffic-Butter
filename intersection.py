@@ -3,6 +3,7 @@ from enum import Enum
 import time
 import random
 import threading
+from location import Location
 stop_sign_delay = 2
 # represents types of intersections that can exist in the traffic simulation
 class Intersection:
@@ -12,9 +13,29 @@ class StopLight(Intersection):
     
     def __init__(self):
         self.y_axis_green = bool(random.randint(0,1))
+        self.queue = [] # (index of car, direction)
 
-    def flip_light(self):
+    def flip_light(self, ts):
         self.y_axis_green = not self.y_axis_green
+        for car_index, direction in self.queue:
+            ts.move_car_to_next_intersection(car_index, direction)
+        self.queue = []
+
+        
+
+    def join_queue(self, car_index, direction, ts):
+        if (car_index, direction) in self.queue:
+            return
+        if (self.y_axis_green) and (direction == Location.left or direction == Location.right):
+            self.queue.append((car_index,direction))
+            print('attempting to move at a red light')
+            return
+        if not self.y_axis_green and (direction == Location.up or direction == Location.down):
+            self.queue.append((car_index,direction))
+            print('attempting to move at a red light')
+            return
+        ts.move_car_to_next_intersection(car_index, direction)
+        
        
     
 class StopSign(Intersection):

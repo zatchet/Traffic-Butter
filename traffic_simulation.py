@@ -17,7 +17,7 @@ class TrafficSimulation:
             raise Exception("Invalid input to Traffic Simulation")
         self.height = height
         self.width = width
-        self.speed_of_cars = speed_of_cars
+        self.speed_of_cars = speed_of_cars # this isn't used at the moment
         self.grid = [[0]*height]*width
         self.cars = self.place_random_cars(num_of_cars)
         self.matrix = matrix
@@ -40,13 +40,7 @@ class TrafficSimulation:
             return
         intersection = self.matrix[curr_position.y][curr_position.x]
         if type(intersection) == StopLight:
-            if (intersection.y_axis_green) and (direction == Location.left or direction == Location.right):
-                print('attempting to move at a red light')
-                return
-            if not intersection.y_axis_green and (direction == Location.up or direction == Location.down):
-                print('attempting to move at a red light')
-                return
-            self.move_car_to_next_intersection(car_index, direction)
+            intersection.join_queue(car_index, direction, self)
         else:
             intersection.join_queue(car_index, direction, self)
                     
@@ -69,7 +63,7 @@ class TrafficSimulation:
         for i in range(len(self.matrix)):
             for j in range(len(self.matrix[0])):
                 if type(self.matrix[i][j]) == StopLight:
-                    self.matrix[i][j].flip_light()
+                    self.matrix[i][j].flip_light(self)
         threading.Timer(self.stop_light_duration, self.setup_thread_for_light_toggle).start()
 
     def car_at_destination(self, index):
