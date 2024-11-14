@@ -30,6 +30,8 @@ class TrafficSimulation:
     def move_car(self, car_index: int, direction: Location):
         if car_index >= len(self.cars):
             raise Exception("move_car: Invalid index of car")
+        if (self.cars[car_index].in_queue):
+            return print("Can't move car, already in queue for a light")
         car = self.cars[car_index]
         curr_position = car.curr_pos
         direction_math = direction.math_dirs()
@@ -38,21 +40,21 @@ class TrafficSimulation:
         if not 0 < new_x < len(self.grid[0]) or not 0 < new_y < len(self.grid):
             print("moving car out of bounds")
             return
-        intersection = self.matrix[curr_position.y][curr_position.x]
-        if type(intersection) == StopLight:
-            intersection.join_queue(car_index, direction, self)
-        else:
-            intersection.join_queue(car_index, direction, self)
+        intersection = self.matrix[new_y][new_x]
+        self.cars[car_index].in_queue = True
+        intersection.join_queue(car_index, direction, self)
                     
 
     def move_car_to_next_intersection(self, car_index, direction):
         car = self.cars[car_index]
         curr_position = car.curr_pos
         direction_math = direction.math_dirs()
+
         new_x = curr_position.x + direction_math[0]
         new_y = curr_position.y + direction_math[1]
 
         new_position = Pos(new_x, new_y)
+        self.cars[car_index].in_queue = False
         car.on_side = direction
         car.curr_pos = new_position 
         print(f'Car:{car_index} moved from {curr_position} to {new_position}')

@@ -9,6 +9,7 @@ class Car:
         self.color = color
         self.source = source
         self.dest = dest
+        self.in_queue = False
 
 
     def __str__(self):
