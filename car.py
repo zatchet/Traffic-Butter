@@ -1,11 +1,32 @@
-from direction import Direction
+from typing import Tuple
+from pos import Pos
+from location import Location
 # Represents a Car in the traffic simulation
 class Car:
-    def __init__(self, y: int, x: int, coming_from: Direction):
-        self.y = y
-        self.x = x
-        self.coming_from = coming_from
+    def __init__(self, curr_pos: Pos, on_side: Location, source: Pos, dest: Pos, color: Tuple[int]):
+        self.curr_pos = curr_pos
+        self.on_side = on_side # what side of the intersection the car is on. A car is always moving out of an intersecion
+        self.color = color
+        self.source = source
+        self.dest = dest
+        self.in_queue = False
+
+
+    def __str__(self):
+        return f"Car at {self.curr_pos}, coming from direction {self.on_side}, orginating from{self.source}, and heading to {self.dest}"
     
     # moves a car from it's current position to its new position
-    def move_to(x, y):
-        pass
+    def move(self,dir):
+        movement = self.on_side.math_dirs()
+        new_postiion = Pos(self.curr_pos + movement[0], self.curr_pos + movement[1])
+        self.on_side = dir
+        self.curr_pos = new_postiion
+
+    # is the car at it's destination
+    def at_destination(self):
+        return self.curr_pos == self.dest
+
+
+        
+
+
