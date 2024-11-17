@@ -50,6 +50,8 @@ class TrafficSimulation:
         intersection = self.matrix[new_y][new_x]
         car.in_queue = True
         intersection.join_queue(car_index, direction, self)
+        if car.at_destination():
+            self.times[car_index] = time.time() - self.start_time
                     
 
     def move_car_to_next_intersection(self, car_index, direction):
@@ -79,7 +81,8 @@ class TrafficSimulation:
         threading.Timer(self.stop_light_duration, self.setup_thread_for_light_toggle).start()
 
     def result(self):
-        return sum(self.times) / len(self.times)
+        filtered_times = [time for time in self.times if time != math.inf]
+        return sum(filtered_times) / len(filtered_times)
     
     def done(self):
         return all(car.at_destination() for car in self.cars)
