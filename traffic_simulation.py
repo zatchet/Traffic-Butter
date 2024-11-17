@@ -96,32 +96,6 @@ class TrafficSimulation:
             car = Car(source, coming_from, source, destination, color, route)
             cars.append(car)
         return cars
-    
-    def simulate(self):
-        last_move_time = time.time()
-        while True:
-            current_time = time.time()
-            # move cars every move_interval seconds
-            if current_time - last_move_time >= MOVE_INTERVAL:
-                self.traffic_simulation.update_car_positions()
-                last_move_time = current_time
-            
-            if self.traffic_simulation.done():
-                result = self.traffic_simulation.result()
-                break
-        return result
-                    
-
-
-
-
-    
-
-
-
-
-#if __name__ == "__main__":
-    #ts = TrafficSimulation(matrix=random_intersection_placement(9, 9))
 
 
 
