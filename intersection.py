@@ -61,6 +61,3 @@ class StopSign(Intersection):
     def move_car_thread(self, car_index, direction, ts):
         self.queue.remove(car_index)
         ts.move_car_to_next_intersection(car_index, direction)
-
-        
-

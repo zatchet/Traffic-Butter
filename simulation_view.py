@@ -8,7 +8,7 @@ from traffic_simulation import TrafficSimulation
 
 #CONSTANTS
 cellSize = 75 # pixels
-car_size = 40
+car_size = 20
 black = (0, 0, 0)
 
 white = (255, 255, 255)
@@ -39,6 +39,8 @@ class GameLoop:
         self.screen_height = cellSize * self.traffic_simulation.height
         self.screen_width = cellSize * self.traffic_simulation.width
         self.car_index = 0
+        self.last_move_time = time.time()
+        self.move_interval = 1.0
 
     def drawGrid(self, screen):
         for y in range(0, self.screen_height, cellSize):
@@ -95,43 +97,29 @@ class GameLoop:
         pygame.init()
         screen = pygame.display.set_mode((self.screen_height, self.screen_width))
         pygame.display.set_caption("Traffic Simulation")
-        clock = pygame.time.Clock()
         self.refresh(screen)
 
-        MOVEEVENT, t, trail = pygame.USEREVENT+1, 250, []
-        pygame.time.set_timer(MOVEEVENT, t, 0)
-        running = True
-        while running:
-            self.draw_city(screen)
+        while True:
             pygame.display.flip()
+            self.refresh(screen)
+            current_time = time.time()
+            # move cars every move_interval seconds
+            if current_time - self.last_move_time >= self.move_interval:
+                self.traffic_simulation.update_car_positions()
+                self.last_move_time = current_time
+            
+            if self.traffic_simulation.done():
+                result = self.traffic_simulation.result()
+                pygame.display.flip()
+                break
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-                if event.type == MOVEEVENT:
-                    self.refresh(screen)
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        running = False
-                    elif event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                        self.traffic_simulation.move_car(self.car_index, Location(2))
-                    elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                        self.traffic_simulation.move_car(self.car_index, Location(3))
-                    elif event.key == pygame.K_w or event.key == pygame.K_UP:
-                        self.traffic_simulation.move_car(self.car_index, Location(0))
-                    elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                        self.traffic_simulation.move_car(self.car_index, Location(1))
-                    elif event.key == pygame.K_h:
-                        self.car_index = (self.car_index + 1) % len(self.traffic_simulation.cars) 
-
+                    break
             
-            self.traffic_simulation.car_at_destination(self.car_index)
-            self.refresh(screen)
-            pygame.display.flip()
-            clock.tick(fps)
-        print(f"{self.traffic_simulation.result()}: average time to destination")
+        print(f"average time to destination: {result} seconds")
         pygame.quit()
-
-
+        
 
 if __name__ == "__main__":
     gl = GameLoop()
