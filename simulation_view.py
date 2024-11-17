@@ -36,7 +36,7 @@ class GameLoop:
                 pygame.draw.rect(screen, BLACK, rect, 1)   
 
     def drawCars(self, screen):
-        for i, car in enumerate(self.traffic_simulation.cars):
+        for car in self.traffic_simulation.cars:
             x = car.curr_pos.x
             y = car.curr_pos.y
             location = car.on_side
@@ -46,7 +46,7 @@ class GameLoop:
                                (y*CELL_SIZE) + (0 if (dir_val_y >= 0) else -CAR_SIZE), 
                                CAR_SIZE + (-abs(dir_val_y)*(CAR_SIZE/2)), 
                                CAR_SIZE + (-abs(dir_val_x)*(CAR_SIZE/2)))
-            pygame.draw.rect(screen, car.color, rect, 4 if i == self.car_index else 0)
+            pygame.draw.rect(screen, car.color, rect, 0)
             pygame.draw.circle(screen, car.color,(((x*CELL_SIZE) + (dir_val_x*(CAR_SIZE*1.25))+ ((CAR_SIZE/4) if dir_val_x == 0 else 0)), 
                                                   ((y*CELL_SIZE) + (dir_val_y*(CAR_SIZE*1.25))+ ((CAR_SIZE/4) if dir_val_y == 0 else 0))), 
                                                   (CAR_SIZE/4))
