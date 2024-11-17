@@ -4,9 +4,12 @@ class Pos:
         self.y = y
 
     def __str__(self):
-        return f"(x: {self.x}, y: {self.y})"
-    
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, Pos):
-            return self.x == value.x and self.y == value.y
-        return False
+        return f"({self.x}, {self.y})"
+
+    def __eq__(self, other):
+        if not isinstance(other, Pos):
+            return False
+        return self.x == other.x and self.y == other.y
+
+    def __hash__(self):
+        return hash((self.x, self.y))
