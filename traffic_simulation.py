@@ -2,13 +2,14 @@ import threading
 from typing import List
 from car import Car
 from pos import Pos
-from location import Location
+from direction import Direction
 import random
 import time
 import math
-from intersection import StopLight, StopSign
+from intersection import StopLight
+from routefinder import RouteFinder
+from constants import *
 
-car_colors = [(134, 56, 210), (29, 254, 155), (98, 92, 9), (20, 25, 253), (24, 121, 41), (123, 245, 86), (155, 194, 214), (46, 163, 45), (253, 221, 106), (37, 38, 175)]
 # Main logic for the Traffic Simulation 
 # Pygame should not be in this file
 class TrafficSimulation:
@@ -19,15 +20,21 @@ class TrafficSimulation:
         self.width = width
         self.speed_of_cars = speed_of_cars # this isn't used at the moment
         self.grid = [[0]*height]*width
-        self.cars = self.place_random_cars(num_of_cars)
         self.matrix = matrix
+        self.cars = self.initialize_cars(num_of_cars)
         self.stop_light_duration = stop_light_duration
         self.start_time = time.time()
         self.times = [math.inf]*num_of_cars
-
         self.setup_thread_for_light_toggle()
 
-    def move_car(self, car_index: int, direction: Location):
+    def update_car_positions(self):
+        for car in self.cars:
+            next_move = car.get_next_move()
+            if next_move:
+                self.move_car(self.cars.index(car), next_move)
+
+    # moves a car from it's current position to its new position, and joins the queue for whatever intersection is at the new position
+    def move_car(self, car_index: int, direction: Direction):
         if car_index >= len(self.cars):
             raise Exception("move_car: Invalid index of car")
         if (self.cars[car_index].in_queue):
@@ -41,14 +48,18 @@ class TrafficSimulation:
             print("moving car out of bounds")
             return
         intersection = self.matrix[new_y][new_x]
-        self.cars[car_index].in_queue = True
+        car.in_queue = True
         intersection.join_queue(car_index, direction, self)
+        if car.at_destination():
+            self.times[car_index] = time.time() - self.start_time
                     
 
     def move_car_to_next_intersection(self, car_index, direction):
         car = self.cars[car_index]
         curr_position = car.curr_pos
         direction_math = direction.math_dirs()
+
+        car.route_index += 1
 
         new_x = curr_position.x + direction_math[0]
         new_y = curr_position.y + direction_math[1]
@@ -58,7 +69,8 @@ class TrafficSimulation:
         car.on_side = direction
         car.curr_pos = new_position 
         print(f'Car:{car_index} moved from {curr_position} to {new_position}')
-
+        if car.at_destination():
+            self.times[car_index] = time.time() - self.start_time
 
 
     def setup_thread_for_light_toggle(self):
@@ -68,40 +80,25 @@ class TrafficSimulation:
                     self.matrix[i][j].flip_light(self)
         threading.Timer(self.stop_light_duration, self.setup_thread_for_light_toggle).start()
 
-    def car_at_destination(self, index):
-        car = self.cars[index]
-        if car.curr_pos == car.dest:
-            end_time = time.time()
-            time_to_dest = end_time - self.start_time
-            self.times[index] = time_to_dest
-
     def result(self):
-        return sum(self.times) / len(self.times)
+        filtered_times = [time for time in self.times if time != math.inf]
+        return sum(filtered_times) / len(filtered_times)
     
     def done(self):
-        return all(not math.inf == i for i in self.times)
-
+        return all(car.at_destination() for car in self.cars)
 
     # place cars randomly on the map
-    def place_random_cars(self, num_of_cars):
+    def initialize_cars(self, num_of_cars):
         cars = []
         for _ in range(num_of_cars):
-            src_x = random.randint(1, self.height-2)
-            src_y = random.randint(1, self.width-2)
-            dest_x = random.randint(1, self.height-2)
-            dest_y = random.randint(1, self.width-2)
-            coming_from = Location(random.randint(0, 3))
-            color = random.choice(car_colors)
-            car = Car(Pos(src_x, src_y),coming_from, Pos(src_x, src_y), Pos(dest_x,dest_y), color)
+            source = Pos(random.randint(1, self.height-2), random.randint(1, self.width-2))
+            destination = Pos(random.randint(1, self.height-2), random.randint(1, self.width-2))
+            coming_from = Direction(random.randint(0, 3))
+            color = random.choice(CAR_COLORS)
+            route = RouteFinder().generate_route(source, destination, self.matrix)
+            car = Car(source, coming_from, source, destination, color, route)
             cars.append(car)
         return cars
-
-
-
-
-
-#if __name__ == "__main__":
-    #ts = TrafficSimulation(matrix=random_intersection_placement(9, 9))
 
 
 
