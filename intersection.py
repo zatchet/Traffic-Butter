@@ -18,20 +18,28 @@ class StopLight(Intersection):
 
     def flip_light(self, ts):
         self.y_axis_green = not self.y_axis_green
-        for car_index, direction in self.queue:
-            ts.move_car_to_next_intersection(car_index, direction)
-        self.queue = []
+        # print('queue', self.queue)
+        if len(self.queue) > 0:
+            self.process_queue(ts)
+    
+    def process_queue(self, ts):    
+        car_index, direction = self.queue.pop(0)  # Get first car in queue
+        ts.move_car_to_next_intersection(car_index, direction)
+        
+        # If there are more cars in queue, schedule the next one
+        if len(self.queue) > 0:
+            threading.Timer(1.0, self.process_queue, args=[ts]).start()
 
     def join_queue(self, car_index, direction, ts):
         if (car_index, direction) in self.queue:
             return
         if (self.y_axis_green) and (direction == Direction.left or direction == Direction.right):
             self.queue.append((car_index,direction))
-            print('attempting to move at a red light')
+            # print('attempting to move at a red light')
             return
         if not self.y_axis_green and (direction == Direction.up or direction == Direction.down):
             self.queue.append((car_index,direction))
-            print('attempting to move at a red light')
+            # print('attempting to move at a red light')
             return
         ts.move_car_to_next_intersection(car_index, direction)
     
@@ -51,7 +59,7 @@ class StopSign(Intersection):
         else:
             self.queue.append(car_index)
             move_after = max(0, stop_sign_delay - (time.time()- self.time_since_last_pass))
-            print(move_after)
+            # print(move_after
             threading.Timer(move_after, self.move_car_thread, kwargs={'car_index': car_index, 'direction': direction, 'ts': ts}).start()
 
     def move_car_thread(self, car_index, direction, ts):

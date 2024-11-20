@@ -35,11 +35,19 @@ class TrafficSimulation:
 
     # moves a car from it's current position to its new position, and joins the queue for whatever intersection is at the new position
     def move_car(self, car_index: int, direction: Direction):
+
+
+        print('move car')
+
+        car = self.cars[car_index]
+        # car.route_index += 1
+
         if car_index >= len(self.cars):
             raise Exception("move_car: Invalid index of car")
-        if (self.cars[car_index].in_queue):
-            return print("Can't move car, already in queue for a light")
-        car = self.cars[car_index]
+        if (car.in_queue):
+            return 
+        print("Can't move car, already in queue for a light")
+        
         curr_position = car.curr_pos
         direction_math = direction.math_dirs()
         new_x = curr_position.x + direction_math[0]
@@ -49,12 +57,16 @@ class TrafficSimulation:
             return
         intersection = self.matrix[new_y][new_x]
         car.in_queue = True
+        car.curr_pos = Pos(new_x, new_y)
         intersection.join_queue(car_index, direction, self)
         if car.at_destination():
             self.times[car_index] = time.time() - self.start_time
                     
 
     def move_car_to_next_intersection(self, car_index, direction):
+
+        print('move car to next int')
+
         car = self.cars[car_index]
         curr_position = car.curr_pos
         direction_math = direction.math_dirs()
@@ -65,10 +77,12 @@ class TrafficSimulation:
         new_y = curr_position.y + direction_math[1]
 
         new_position = Pos(new_x, new_y)
-        self.cars[car_index].in_queue = False
+        car.in_queue = False
         car.on_side = direction
-        car.curr_pos = new_position 
-        print(f'Car:{car_index} moved from {curr_position} to {new_position}')
+        # car.curr_pos = new_position 
+        # 
+        # 
+        # print(f'Car:{car_index} moved from {curr_position} to {new_position}')
         if car.at_destination():
             self.times[car_index] = time.time() - self.start_time
 
@@ -93,11 +107,16 @@ class TrafficSimulation:
         for _ in range(num_of_cars):
             source = Pos(random.randint(1, self.height-2), random.randint(1, self.width-2))
             destination = Pos(random.randint(1, self.height-2), random.randint(1, self.width-2))
+            
+
             coming_from = Direction(random.randint(0, 3))
             color = random.choice(CAR_COLORS)
             route = RouteFinder().generate_route(source, destination, self.matrix)
             car = Car(source, coming_from, source, destination, color, route)
             cars.append(car)
+            print('source', source)
+            print('dest', destination)
+            print('route', route)
         return cars
 
 

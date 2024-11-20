@@ -24,7 +24,7 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 # Represents all information to rendering the game
 class GameLoop:
     def __init__(self):
-        self.traffic_simulation = TrafficSimulation(matrix=random_intersection_placement(9, 9), stop_light_duration=1.5)
+        self.traffic_simulation = TrafficSimulation(matrix=random_intersection_placement(9, 9), stop_light_duration=10, num_of_cars=1)
         self.screen_height = CELL_SIZE * self.traffic_simulation.height
         self.screen_width = CELL_SIZE * self.traffic_simulation.width
         self.car_index = 0
