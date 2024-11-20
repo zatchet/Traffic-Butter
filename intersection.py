@@ -31,7 +31,7 @@ class StopLight(Intersection):
         if len(self.queue) > 0:
             threading.Timer(LIGHT_RELEASE_DELAY, self.process_queue, args=[ts]).start()
 
-    def join_queue(self, car_index, direction, ts):
+    def join(self, car_index, direction, ts):
         if (car_index, direction) in self.queue:
             return
         if (self.y_axis_green) and (direction == Direction.left or direction == Direction.right):
@@ -49,7 +49,7 @@ class StopSign(Intersection):
         self.time_since_last_pass = 0
         self.queue = []
         
-    def join_queue(self, car_index, direction, ts):
+    def join(self, car_index, direction, ts):
         if car_index in self.queue:
             print('car already at intersection')
             return

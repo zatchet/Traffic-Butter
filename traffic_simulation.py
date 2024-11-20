@@ -66,7 +66,7 @@ class TrafficSimulation:
         car.in_queue = True
         
         intersection = self.matrix[new_y][new_x]
-        intersection.join_queue(car_index, direction, self)
+        intersection.join(car_index, direction, self)
         if car.at_destination():
             self.times[car_index] = time.time() - self.start_time
                     
