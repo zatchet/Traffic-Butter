@@ -29,7 +29,7 @@ class StopLight(Intersection):
         
         # If there are more cars in queue, schedule the next one
         if len(self.queue) > 0:
-            threading.Timer(LIGHT_RELEASE_DELAY, self.process_queue, args=[ts]).start()
+            threading.Timer(LIGHT_RELEASE_RATE, self.process_queue, args=[ts]).start()
 
     def join(self, car_index, direction, ts):
         if (car_index, direction) in self.queue:

@@ -103,9 +103,9 @@ class TrafficSimulation:
             route = RouteFinder().generate_route(source, destination, self.matrix)
             car = Car(coming_from, source, destination, color, route)
             cars.append(car)
-            print('source', source)
-            print('dest', destination)
-            print('route', route)
+            # print('source', source)
+            # print('dest', destination)
+            # print('route', route)
 
         # manual routes for debugging
         # c1 = Car(Direction(0), Pos(4,8), Pos(4,2), 'red', [Direction.up]*6)
