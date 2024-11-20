@@ -5,26 +5,11 @@ from typing import List
 from intersection import Intersection, StopLight, StopSign
 from traffic_simulation import TrafficSimulation
 from constants import *
-   
- # TODO move to run.py (in here for testing purposes)       
-def random_intersection_placement(width: int, height: int) -> List[List[Intersection]]:
-    matrix = [[None for i in range(width)] for i in range(height)]
-    print(matrix, 'matrix creation')
-    for y in range(height):
-        for x in range(width):
-            if y == 0 or x == 0:
-                continue
-            random_intersection = random.randint(0, 1)
-            if random_intersection == 1:
-                matrix[y][x] = StopLight()
-            else:
-                matrix[y][x] = StopSign()
-    return matrix 
        
 # Represents all information to rendering the game
 class GameLoop:
     def __init__(self):
-        self.traffic_simulation = TrafficSimulation(matrix=random_intersection_placement(9, 9), stop_light_duration=10, num_of_cars=1)
+        self.traffic_simulation = TrafficSimulation(num_of_cars=30)
         self.screen_height = CELL_SIZE * self.traffic_simulation.height
         self.screen_width = CELL_SIZE * self.traffic_simulation.width
         self.car_index = 0
@@ -105,7 +90,7 @@ class GameLoop:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
-            
+        
         print(f"average time to destination: {result} seconds")
         pygame.quit()
 

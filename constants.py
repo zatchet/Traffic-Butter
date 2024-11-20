@@ -1,4 +1,6 @@
-MOVE_INTERVAL = 1.0 # cars move every MOVE_INTERVAL seconds
+MOVE_INTERVAL = 0.5 # move free cars every MOVE_INTERVAL seconds
+LIGHT_RELEASE_DELAY = 1
+STOP_SIGN_DELAY = 2
 
 CELL_SIZE = 75 # pixels
 CAR_SIZE = 20
