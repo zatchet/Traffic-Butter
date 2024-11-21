@@ -55,6 +55,7 @@ class TrafficSimulation:
         new_x = curr_position.x + direction_math[0]
         new_y = curr_position.y + direction_math[1]
         car.curr_pos = Pos(new_x, new_y)
+        car.on_side = direction
 
         if car.at_destination():
             car.color = 'black'
@@ -74,7 +75,6 @@ class TrafficSimulation:
         car = self.cars[car_index]
         car.route_index += 1
         car.in_queue = False
-        car.on_side = direction
 
     def setup_intersection_threads(self):
         # Initialize threads for all intersections
