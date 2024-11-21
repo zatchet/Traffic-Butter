@@ -68,16 +68,11 @@ class GameLoop:
         pygame.display.set_caption("Traffic Simulation")
         self.refresh(screen)
 
-        last_move_time = time.time()
-
         while True:
             pygame.display.flip()
             self.refresh(screen)
-            current_time = time.time()
-            # move cars every move_interval seconds
-            if current_time - last_move_time >= MOVE_INTERVAL:
-                self.traffic_simulation.update_car_positions()
-                last_move_time = current_time
+            
+            self.traffic_simulation.update_car_positions()
             
             if self.traffic_simulation.done():
                 self.refresh(screen)

@@ -1,5 +1,3 @@
-from enum import Enum
-
 import time
 import random
 import threading
@@ -52,18 +50,13 @@ class StopSign(Intersection):
         self.queue = []
         
     def join(self, car_index, direction, ts):
-        if car_index in self.queue:
-            # print('car already at intersection')
+        self.queue.append((car_index, direction))
+        threading.Timer(STOP_SIGN_RELEASE_RATE, self.process_queue, kwargs={'ts': ts}).start()
+    
+    def process_queue(self, ts):
+        if len(self.queue) == 0:
             return
-        
-        if self.time_since_last_pass + STOP_SIGN_DELAY < time.time():
-            ts.release_car_from_queue(car_index, direction)
-            self.time_since_last_pass = time.time()
-        else:
-            self.queue.append(car_index)
-            move_after = max(0, STOP_SIGN_DELAY - (time.time()- self.time_since_last_pass))
-            threading.Timer(move_after, self.move_car_thread, kwargs={'car_index': car_index, 'direction': direction, 'ts': ts}).start()
-
-    def move_car_thread(self, car_index, direction, ts):
-        self.queue.remove(car_index)
+        car_index, direction = self.queue.pop(0)
         ts.release_car_from_queue(car_index, direction)
+        if len(self.queue) > 0:
+            threading.Timer(STOP_SIGN_RELEASE_RATE, self.process_queue, kwargs={'ts': ts}).start()
