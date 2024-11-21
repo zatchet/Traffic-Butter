@@ -1,5 +1,6 @@
-LIGHT_RELEASE_RATE = 1
-STOP_SIGN_RELEASE_RATE = 2
+LIGHT_RELEASE_RATE = 1 # when the light is green, cars go through it every LIGHT_RELEASE_RATE seconds
+STOP_SIGN_RELEASE_RATE = 2 # every STOP_SIGN_RELEASE_RATE seconds, a car is released from the stop sign
+MINIMUM_STOP_SIGN_WAIT_TIME = 1 # if a car arrives at an empty stop sign, it must wait at least MINIMUM_STOP_SIGN_WAIT_TIME seconds before it can be released
 
 CELL_SIZE = 75 # pixels
 CAR_SIZE = 20

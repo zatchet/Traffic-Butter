@@ -71,7 +71,7 @@ class TrafficSimulation:
         intersection = self.matrix[new_y][new_x]
         intersection.join(car_index, direction, self)
 
-    def release_car_from_queue(self, car_index, direction):
+    def release_car_from_queue(self, car_index):
         car = self.cars[car_index]
         car.route_index += 1
         car.in_queue = False
@@ -95,10 +95,10 @@ class TrafficSimulation:
         for _ in range(num_of_cars):
             source = Pos(random.randint(1, self.width-1), random.randint(1, self.height-1))
             destination = Pos(random.randint(1, self.width-1), random.randint(1, self.height-1))
-            coming_from = Direction(random.randint(0, 3))
             color = random.choice(CAR_COLORS)
             route = RouteFinder().generate_route(source, destination, self.matrix)
-            car = Car(coming_from, source, destination, color, route)
+            initial_direction = route[0] if len(route) > 0 else Direction.up
+            car = Car(initial_direction, source, destination, color, route)
             cars.append(car)
 
         # manual routes for debugging
