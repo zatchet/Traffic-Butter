@@ -35,8 +35,7 @@ class TrafficSimulation:
         self.cars = self.initialize_cars(num_of_cars)
         self.start_time = time.time()
         self.times = [math.inf]*num_of_cars
-        self.setup_thread_for_light_toggle()
-
+        self.setup_intersection_threads()
 
     # moves all cars which are currently free to move
     def update_car_positions(self):
@@ -77,13 +76,11 @@ class TrafficSimulation:
         car.in_queue = False
         car.on_side = direction
 
-    def setup_thread_for_light_toggle(self):
-        # flip each light initally once to get the threads started, 
-        # then the lights will continue to flip themselves
-        for i in range(len(self.matrix)):
-            for j in range(len(self.matrix[0])):
-                if type(self.matrix[i][j]) == StopLight:
-                    self.matrix[i][j].flip_light(self)
+    def setup_intersection_threads(self):
+        # Initialize threads for all intersections
+        for y in range(1, self.height):
+            for x in range(1, self.width):
+                self.matrix[y][x].start_timer(self)
 
     def result(self):
         filtered_times = [time for time in self.times if time != math.inf]
@@ -105,9 +102,15 @@ class TrafficSimulation:
             cars.append(car)
 
         # manual routes for debugging
-        # c1 = Car(Direction(0), Pos(4,8), Pos(4,2), 'red', [Direction.up]*6)
+        # route = RouteFinder().generate_route(Pos(4,8), Pos(4,8), self.matrix)
+        # c1 = Car(Direction(0), Pos(4,6), Pos(4,6), 'red', route)
         # c2 = Car(Direction(0), Pos(4,7), Pos(4,2), 'blue', [Direction.up]*5)
-        # cars = [c1, c2]
+        # c3 = Car(Direction(0), Pos(4,7), Pos(4,2), 'green', [Direction.up]*5)
+        # c4 = Car(Direction(0), Pos(4,7), Pos(4,2), 'yellow', [Direction.up]*5)
+        # c5 = Car(Direction(0), Pos(4,7), Pos(4,2), 'blue', [Direction.up]*5)
+        # c6 = Car(Direction(0), Pos(4,7), Pos(4,2), 'green', [Direction.up]*5)
+        # cars = [c2, c3, c4, c5, c6]
+        # print('route', c1.route)
 
         return cars
 
