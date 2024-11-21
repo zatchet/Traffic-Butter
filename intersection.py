@@ -8,8 +8,8 @@ class Intersection:
     pass
 
 class StopLight(Intersection):
-    def __init__(self, duration):
-        self.y_axis_green = bool(random.randint(0,1))
+    def __init__(self, duration, y_axis_green):
+        self.y_axis_green = y_axis_green
         self.queues = {direction: [] for direction in Direction}
         self.duration = duration
 
