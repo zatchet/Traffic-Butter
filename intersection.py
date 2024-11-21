@@ -20,16 +20,18 @@ class StopLight(Intersection):
     def flip_light(self, ts):
         self.y_axis_green = not self.y_axis_green
         if len(self.queue) > 0:
-            self.process_queue(ts)
+            queue_copy = self.queue.copy()
+            self.queue = []
+            self.process_queue(ts, queue_copy)
         threading.Timer(self.duration, self.flip_light, kwargs={'ts': ts}).start()
     
-    def process_queue(self, ts):    
-        car_index, direction = self.queue.pop(0)  # Get first car in queue
+    def process_queue(self, ts, queue_copy):
+        car_index, direction = queue_copy.pop(0)  # Get first car in queue
         ts.release_car_from_queue(car_index, direction)
         
         # If there are more cars in queue, schedule the next one
-        if len(self.queue) > 0:
-            threading.Timer(LIGHT_RELEASE_RATE, self.process_queue, args=[ts]).start()
+        if len(queue_copy) > 0:
+            threading.Timer(LIGHT_RELEASE_RATE, self.process_queue, kwargs={'ts': ts, 'queue_copy': queue_copy}).start()
 
     def join(self, car_index, direction, ts):
         if (car_index, direction) in self.queue:
