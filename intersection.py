@@ -53,7 +53,7 @@ class StopSign(Intersection):
         
     def join(self, car_index, direction, ts):
         if car_index in self.queue:
-            print('car already at intersection')
+            # print('car already at intersection')
             return
         
         if self.time_since_last_pass + STOP_SIGN_DELAY < time.time():

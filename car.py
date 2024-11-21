@@ -14,6 +14,7 @@ class Car:
         self.source = source
         self.dest = dest
         self.in_queue = False
+        self.finished = False
         self.route = route
         self.route_index = 0 # keeps track of where the car is along its route
         Car.id += 1
