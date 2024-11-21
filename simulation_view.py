@@ -1,12 +1,12 @@
 import pygame
-from intersection import StopLight, StopSign
+from intersection import StopLight, FourWayStopSign, TwoWayStopSign
 from traffic_simulation import TrafficSimulation
 from constants import *
        
 # Represents all information to rendering the game
 class GameLoop:
     def __init__(self):
-        self.traffic_simulation = TrafficSimulation(num_of_cars=30)
+        self.traffic_simulation = TrafficSimulation(num_of_cars=50)
         self.screen_height = CELL_SIZE * self.traffic_simulation.height
         self.screen_width = CELL_SIZE * self.traffic_simulation.width
 
@@ -41,12 +41,19 @@ class GameLoop:
                     pygame.draw.circle(screen, GREEN if not intersection.y_axis_green else RED, ((x*CELL_SIZE) + 8,(y * CELL_SIZE)), 5)
                     pygame.draw.circle(screen, GREEN if intersection.y_axis_green else RED, ((x*CELL_SIZE),(y * CELL_SIZE) - 8), 5)
                     pygame.draw.circle(screen, GREEN if intersection.y_axis_green else RED, ((x*CELL_SIZE),(y * CELL_SIZE) + 8), 5)
-                if type(intersection) == StopSign:
+                if type(intersection) == FourWayStopSign:
                     rect = pygame.Rect((x*CELL_SIZE)-4,
                                        (y*CELL_SIZE)-4,
                                        10,
                                        10)
                     pygame.draw.rect(screen, RED, rect)
+                if type(intersection) == TwoWayStopSign:
+                    if intersection.y_axis_free:
+                        pygame.draw.circle(screen, RED, ((x*CELL_SIZE) - 8,(y * CELL_SIZE)), 5)
+                        pygame.draw.circle(screen, RED, ((x*CELL_SIZE) + 8,(y * CELL_SIZE)), 5)
+                    else:
+                        pygame.draw.circle(screen, RED, ((x*CELL_SIZE),(y * CELL_SIZE) - 8), 5)
+                        pygame.draw.circle(screen, RED, ((x*CELL_SIZE),(y * CELL_SIZE) + 8), 5)
 
     # begins the simuation
     def start(self):

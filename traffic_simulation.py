@@ -5,7 +5,7 @@ from direction import Direction
 import random
 import time
 import math
-from intersection import StopLight, Intersection, StopSign
+from intersection import StopLight, Intersection, TwoWayStopSign, FourWayStopSign
 from routefinder import RouteFinder
 from constants import *
 
@@ -16,17 +16,19 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
         for x in range(width):
             if y == 0 or x == 0:
                 continue
-            random_intersection = random.randint(0, 1)
-            if random_intersection == 1:
+            random_intersection = random.choice([0, 1, 2])
+            if random_intersection == 0:
                 matrix[y][x] = StopLight(duration = random.choice([5,10]))
-            else:
-                matrix[y][x] = StopSign()
+            elif random_intersection == 1:
+                matrix[y][x] = FourWayStopSign()
+            elif random_intersection == 2:
+                matrix[y][x] = TwoWayStopSign(y_axis_free=random.choice([True, False]))
     return matrix 
 
 # Main logic for the Traffic Simulation 
 # Pygame should not be in this file
 class TrafficSimulation:
-    def __init__(self, matrix: List[List[Intersection]] = random_intersection_placement(10, 8), num_of_cars: int = 6):
+    def __init__(self, matrix: List[List[Intersection]] = random_intersection_placement(10, 10), num_of_cars: int = 6):
         self.height = len(matrix)
         self.width = len(matrix[0])
         if self.height < 2 or self.width < 2 or num_of_cars <= 0:
@@ -69,7 +71,9 @@ class TrafficSimulation:
         
         car.in_queue = True
         intersection = self.matrix[new_y][new_x]
-        intersection.join(car_index, direction, self)
+
+        next_direction = car.route[car.route_index+1] if car.route_index+1 < len(car.route) else None
+        intersection.join(car_index, direction, next_direction, self)
 
     def release_car_from_queue(self, car_index):
         car = self.cars[car_index]
