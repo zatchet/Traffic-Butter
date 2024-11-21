@@ -1,4 +1,3 @@
-import time
 import random
 import threading
 from direction import Direction
@@ -16,13 +15,13 @@ class StopLight(Intersection):
         self.release_delay = 1
 
     # every duration seconds, flip the light
-    def start_timer(self, ts):
+    def flip_light(self, ts):
         self.y_axis_green = not self.y_axis_green
         if len(self.queue) > 0:
             queue_copy = self.queue.copy()
             self.queue = []
             self.process_queue(ts, queue_copy)
-        threading.Timer(self.duration, self.start_timer, kwargs={'ts': ts}).start()
+        threading.Timer(self.duration, self.flip_light, kwargs={'ts': ts}).start()
     
     # release a car from the queue every LIGHT_RELEASE_RATE seconds
     def process_queue(self, ts, queue_copy):
@@ -49,16 +48,12 @@ class StopLight(Intersection):
 class StopSign(Intersection):
     def __init__(self):
         self.time_since_last_pass = 0
-        self.queue = []
+        self.cars_waiting = 0
         
     def join(self, car_index, direction, ts):
-        self.queue.append((car_index, time.time()))
+        self.cars_waiting += 1
+        threading.Timer(STOP_SIGN_RELEASE_RATE*self.cars_waiting, self.release_car, kwargs={'ts': ts, 'car_index': car_index}).start()
     
-    # every STOP_SIGN_RELEASE_RATE seconds, release a car from the queue
-    def start_timer(self, ts):
-        if len(self.queue) > 0:
-            time_added = self.queue[0][1]
-            if time.time() - time_added > MINIMUM_STOP_SIGN_WAIT_TIME:
-                car_index = self.queue.pop(0)[0]
-                ts.release_car_from_queue(car_index)
-        threading.Timer(STOP_SIGN_RELEASE_RATE, self.start_timer, kwargs={'ts': ts}).start()
+    def release_car(self, ts, car_index):
+        ts.release_car_from_queue(car_index)
+        self.cars_waiting -= 1

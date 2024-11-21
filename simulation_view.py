@@ -1,5 +1,4 @@
 import pygame
-import time
 from intersection import StopLight, StopSign
 from traffic_simulation import TrafficSimulation
 from constants import *

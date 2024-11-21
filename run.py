@@ -1,5 +1,4 @@
 from traffic_simulation import TrafficSimulation
-import time
 from constants import *
 
 # AI function will go in this file where we will simulate the game. We can think of the game as a black box.

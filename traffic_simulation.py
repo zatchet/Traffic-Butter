@@ -35,7 +35,7 @@ class TrafficSimulation:
         self.cars = self.initialize_cars(num_of_cars)
         self.start_time = time.time()
         self.times = [math.inf]*num_of_cars
-        self.setup_intersection_threads()
+        self.setup_light_timers()
 
     # moves all cars which are currently free to move
     def update_car_positions(self):
@@ -76,11 +76,13 @@ class TrafficSimulation:
         car.route_index += 1
         car.in_queue = False
 
-    def setup_intersection_threads(self):
+    def setup_light_timers(self):
         # Initialize threads for all intersections
         for y in range(1, self.height):
             for x in range(1, self.width):
-                self.matrix[y][x].start_timer(self)
+                intersection = self.matrix[y][x]
+                if isinstance(intersection, StopLight):
+                    intersection.flip_light(self)
 
     def result(self):
         filtered_times = [time for time in self.times if time != math.inf]
