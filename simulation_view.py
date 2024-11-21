@@ -6,7 +6,7 @@ from constants import *
 # Represents all information to rendering the game
 class GameLoop:
     def __init__(self):
-        self.traffic_simulation = TrafficSimulation(num_of_cars=50)
+        self.traffic_simulation = TrafficSimulation(num_of_cars=100)
         self.screen_height = CELL_SIZE * self.traffic_simulation.height
         self.screen_width = CELL_SIZE * self.traffic_simulation.width
 

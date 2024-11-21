@@ -10,12 +10,9 @@ from routefinder import RouteFinder
 from constants import *
 
 def random_intersection_placement(width: int, height: int) -> List[List[Intersection]]:
-    matrix = [[None for i in range(width)] for i in range(height)]
-    # print(matrix, 'matrix creation')
-    for y in range(height):
-        for x in range(width):
-            if y == 0 or x == 0:
-                continue
+    matrix = [[None for _ in range(width)] for _ in range(height)]
+    for y in range(1, height):
+        for x in range(1, width):
             random_intersection = random.choice([0, 1, 2])
             if random_intersection == 0:
                 matrix[y][x] = StopLight(duration = random.choice([5,10]))
@@ -28,7 +25,7 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 # Main logic for the Traffic Simulation 
 # Pygame should not be in this file
 class TrafficSimulation:
-    def __init__(self, matrix: List[List[Intersection]] = random_intersection_placement(10, 10), num_of_cars: int = 6):
+    def __init__(self, num_of_cars, matrix: List[List[Intersection]] = random_intersection_placement(10, 10)):
         self.height = len(matrix)
         self.width = len(matrix[0])
         if self.height < 2 or self.width < 2 or num_of_cars <= 0:

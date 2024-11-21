@@ -21,7 +21,7 @@ from constants import *
 # returns the average time to destination
 
 def simulate(ai_inputs):
-    ts = TrafficSimulation(matrix=ai_inputs, num_of_cars=10)
+    ts = TrafficSimulation(num_of_cars=10, matrix=ai_inputs)
     while True:        
         ts.update_car_positions()
         if ts.done():
