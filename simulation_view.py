@@ -7,9 +7,7 @@ from constants import *
 class GameLoop:
     def __init__(self):
         self.traffic_simulation = TrafficSimulation(num_of_cars=100)
-        self.screen_height = 1200
-        self.screen_width = 1200
-        self.cell_size = min(self.screen_height // self.traffic_simulation.height, self.screen_width // self.traffic_simulation.width)
+        self.cell_size = min(MAX_SCREEN_SIZE // self.traffic_simulation.height, MAX_SCREEN_SIZE // self.traffic_simulation.width)
         self.screen_height = int(self.cell_size * self.traffic_simulation.height)
         self.screen_width = int(self.cell_size * self.traffic_simulation.width)
         self.CAR_SIZE = self.cell_size / 4
@@ -41,23 +39,23 @@ class GameLoop:
             for x in range(1, self.traffic_simulation.width):
                 intersection = self.traffic_simulation.matrix[y][x]
                 if type(intersection) == StopLight:
-                    pygame.draw.circle(screen, GREEN if not intersection.y_axis_green else RED, ((x*self.cell_size) - (.1 * self.cell_size),(y * self.cell_size)), (self.cell_size / 20))
-                    pygame.draw.circle(screen, GREEN if not intersection.y_axis_green else RED, ((x*self.cell_size) + (.1 * self.cell_size),(y * self.cell_size)), (self.cell_size / 20))
-                    pygame.draw.circle(screen, GREEN if intersection.y_axis_green else RED, ((x*self.cell_size),(y * self.cell_size) - (.1 * self.cell_size)), (self.cell_size / 20))
-                    pygame.draw.circle(screen, GREEN if intersection.y_axis_green else RED, ((x*self.cell_size),(y * self.cell_size) + (.1 * self.cell_size)), (self.cell_size / 20))
+                    pygame.draw.circle(screen, GREEN if not intersection.y_axis_green else RED, ((x*self.cell_size) - (.1 * self.cell_size),(y * self.cell_size)), max(4, (self.cell_size / 20)))
+                    pygame.draw.circle(screen, GREEN if not intersection.y_axis_green else RED, ((x*self.cell_size) + (.1 * self.cell_size),(y * self.cell_size)), max(4, (self.cell_size / 20)))
+                    pygame.draw.circle(screen, GREEN if intersection.y_axis_green else RED, ((x*self.cell_size),(y * self.cell_size) - (.1 * self.cell_size)), max(4, (self.cell_size / 20)))
+                    pygame.draw.circle(screen, GREEN if intersection.y_axis_green else RED, ((x*self.cell_size),(y * self.cell_size) + (.1 * self.cell_size)), max(4, (self.cell_size / 20)))
                 if type(intersection) == FourWayStopSign:
                     rect = pygame.Rect((x*self.cell_size)-(.05 * self.cell_size),
                                        (y*self.cell_size)-(.05 * self.cell_size),
-                                       (self.cell_size / 10),
-                                       (self.cell_size / 10))
+                                       max(8, (self.cell_size / 10)),
+                                       max(8, (self.cell_size / 10)))
                     pygame.draw.rect(screen, RED, rect)
                 if type(intersection) == TwoWayStopSign:
                     if intersection.y_axis_free:
-                        pygame.draw.circle(screen, RED, ((x*self.cell_size) - (.1 * self.cell_size),(y * self.cell_size)), (self.cell_size / 20))
-                        pygame.draw.circle(screen, RED, ((x*self.cell_size) + (.1 * self.cell_size),(y * self.cell_size)), (self.cell_size / 20))
+                        pygame.draw.circle(screen, RED, ((x*self.cell_size) - (.1 * self.cell_size),(y * self.cell_size)), max(4, (self.cell_size / 20)))
+                        pygame.draw.circle(screen, RED, ((x*self.cell_size) + (.1 * self.cell_size),(y * self.cell_size)), max(4, (self.cell_size / 20)))
                     else:
-                        pygame.draw.circle(screen, RED, ((x*self.cell_size),(y * self.cell_size) - (.1 * self.cell_size)), (self.cell_size / 20))
-                        pygame.draw.circle(screen, RED, ((x*self.cell_size),(y * self.cell_size) + (.1 * self.cell_size)), (self.cell_size / 20))
+                        pygame.draw.circle(screen, RED, ((x*self.cell_size),(y * self.cell_size) - (.1 * self.cell_size)), max(4, (self.cell_size / 20)))
+                        pygame.draw.circle(screen, RED, ((x*self.cell_size),(y * self.cell_size) + (.1 * self.cell_size)), max(4, (self.cell_size / 20)))
 
     # begins the simuation
     def start(self):
