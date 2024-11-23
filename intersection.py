@@ -3,6 +3,12 @@ import threading
 from direction import Direction
 from constants import *
 
+# does func with kwargs after time seconds
+def start_timer(time, func, kwargs):
+    timer = threading.Timer(time, func, kwargs=kwargs)
+    timer.daemon = True
+    timer.start()
+
 # represents types of intersections that can exist in the traffic simulation
 class Intersection:
     pass
@@ -20,10 +26,8 @@ class StopLight(Intersection):
         if len(queues_to_be_processed) > 2:
             raise Exception("Should never be more than 2 queues with cars")
         self.queues = {direction: [] for direction in Direction}
-        self.process_queues(ts, queues_to_be_processed)
-        timer = threading.Timer(self.duration, self.flip_light, kwargs={'ts': ts})
-        timer.daemon = True
-        timer.start()
+        start_timer(LIGHT_RELEASE_RATE, self.process_queues, kwargs={'ts': ts, 'queues': queues_to_be_processed})
+        start_timer(self.duration, self.flip_light, kwargs={'ts': ts})
     
     # release a car from each of the 2 queues every LIGHT_RELEASE_RATE seconds
     def process_queues(self, ts, queues):
@@ -34,10 +38,8 @@ class StopLight(Intersection):
             if len(queue) == 0:
                 continue
             car_index, next_direction = queue.pop(0)  # Get first car in queue
-            left_turn_penalty = 0.5 if next_direction == Direction.left else 0
-            timer = threading.Timer(left_turn_penalty, ts.release_car_from_queue, kwargs={'car_index': car_index})
-            timer.daemon = True
-            timer.start()
+            left_turn_penalty = LEFT_TURN_PENALTY if next_direction == Direction.left else 0
+            start_timer(left_turn_penalty, ts.release_car_from_queue, kwargs={'car_index': car_index})
         
         # If there are more cars in either queue, schedule the next one
         if any(len(queue) > 0 for queue in queues):
@@ -52,11 +54,11 @@ class StopLight(Intersection):
                 return
         if direction in [Direction.up, Direction.down] and self.y_axis_green:
             # green light, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            start_timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
             return
         if direction in [Direction.left, Direction.right] and not self.y_axis_green:
             # green light, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            start_timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
             return
         # red light, add to proper queue
         self.queues[direction].append((car_index, next_direction))
@@ -68,9 +70,7 @@ class FourWayStopSign(Intersection):
         
     def join(self, car_index, direction, next_direction, ts):
         self.cars_waiting += 1
-        timer = threading.Timer(STOP_SIGN_RELEASE_RATE*self.cars_waiting, self.release_car, kwargs={'ts': ts, 'car_index': car_index})
-        timer.daemon = True
-        timer.start()
+        start_timer(STOP_SIGN_RELEASE_RATE*self.cars_waiting, self.release_car, kwargs={'ts': ts, 'car_index': car_index})
     
     def release_car(self, ts, car_index):
         ts.release_car_from_queue(car_index)
@@ -89,23 +89,18 @@ class TwoWayStopSign(Intersection):
     def join(self, car_index, direction, next_direction, ts):
         if direction in [Direction.up, Direction.down] and self.y_axis_free:
             # no stop, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            start_timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
             return
         if direction in [Direction.left, Direction.right] and not self.y_axis_free:
             # no stop, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            start_timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
             return
         # stop sign, add to proper queue
         self.queues[direction].append(car_index)
         cars_in_queue = len(self.queues[direction])
-        timer = threading.Timer(STOP_SIGN_RELEASE_RATE*cars_in_queue, 
-                        self.release_car, kwargs={'ts': ts, 'car_index': car_index, 'direction': direction, 'next_direction': next_direction})
-        timer.daemon = True
-        timer.start()
+        start_timer(STOP_SIGN_RELEASE_RATE*cars_in_queue, self.release_car, kwargs={'ts': ts, 'car_index': car_index, 'direction': direction, 'next_direction': next_direction})
 
     def release_car(self, ts, car_index, direction,next_direction):
-        left_turn_penalty = 0.5 if next_direction == Direction.left else 0
-        timer = threading.Timer(left_turn_penalty, ts.release_car_from_queue, kwargs={'car_index': car_index})
-        timer.daemon = True
-        timer.start()
+        left_turn_penalty = LEFT_TURN_PENALTY if next_direction == Direction.left else 0
+        start_timer(left_turn_penalty, ts.release_car_from_queue, kwargs={'car_index': car_index})
         self.queues[direction].remove(car_index)
