@@ -27,7 +27,7 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 class TrafficSimulation:
     def __init__(self, num_of_cars = None, origin_destination_pairs: List[Tuple[Pos, Pos]] = None, 
                  matrix: List[List[Intersection]] = None):
-        self.matrix = matrix if matrix else random_intersection_placement(DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT)
+        self.matrix = matrix or random_intersection_placement(DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT)
         self.height = len(self.matrix)
         self.width = len(self.matrix[0])
         if self.height < 2 or self.width < 2:
