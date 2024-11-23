@@ -1,4 +1,4 @@
-from intersection import StopLight, FourWayStopSign, TwoWayStopSign
+from intersection import StopLight, FourWayStopSign, TwoWayStopSign, Intersection
 from pos import Pos
 from direction import Direction
 from queue import PriorityQueue
@@ -12,7 +12,7 @@ class PrioritizedItem:
     item: Any = field(compare=False)
 
 class RouteFinder:
-    def generate_route(self, source: Pos, dest: Pos, grid: List[List[int]]) -> list[Direction]:
+    def generate_route(self, source: Pos, dest: Pos, grid: List[List[Intersection]]) -> list[Direction]:
         """A* pathfinding algorithm that considers intersection costs"""
         
         def heuristic(pos: Pos) -> float:
