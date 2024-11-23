@@ -1,5 +1,5 @@
 # tweak this to change the simulation speed
-SCALE_FACTOR = 0.1
+SCALE_FACTOR = .1
 
 LIGHT_RELEASE_RATE = 1*SCALE_FACTOR # when the light turns green, cars that were in queue go through it every LIGHT_RELEASE_RATE seconds
 STOP_SIGN_RELEASE_RATE = 2*SCALE_FACTOR # every STOP_SIGN_RELEASE_RATE seconds, a car is released from the stop sign
@@ -8,8 +8,8 @@ MOVEMENT_DELAY = 0.5*SCALE_FACTOR # time it takes a car to move one cell (e.g. t
 
 POSSIBLE_LIGHT_DURATIONS = [x * SCALE_FACTOR for x in [2, 3, 4, 5, 6]]
 
-GRID_SIZE_Y = 6
-GRID_SIZE_X = 6
+DEFAULT_GRID_HEIGHT = 6
+DEFAULT_GRID_WIDTH = 6
 
 MAX_SCREEN_SIZE = 800 # Max size the grid can be (axis agnostic)
 BLACK = (0, 0, 0)
