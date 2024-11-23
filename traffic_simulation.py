@@ -25,19 +25,23 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 # Main logic for the Traffic Simulation 
 # Pygame should not be in this file
 class TrafficSimulation:
-    def __init__(self, num_of_cars, origin_destination_pairs: List[Tuple[Pos, Pos]] = None, 
+    def __init__(self, num_of_cars = None, origin_destination_pairs: List[Tuple[Pos, Pos]] = None, 
                  matrix: List[List[Intersection]] = random_intersection_placement(GRID_SIZE_X, GRID_SIZE_Y)):
         self.height = len(matrix)
         self.width = len(matrix[0])
-        if self.height < 2 or self.width < 2 or num_of_cars <= 0:
+        if self.height < 2 or self.width < 2:
             raise Exception("Invalid input to Traffic Simulation")
         self.matrix = matrix
         self.start_time = time.time()
-        self.times = [math.inf]*num_of_cars
-        if origin_destination_pairs:
+        if origin_destination_pairs and num_of_cars:
+            raise Exception("Cannot specify both num_of_cars and origin_destination_pairs")
+        elif origin_destination_pairs and len(origin_destination_pairs) > 0:
             self.cars = self.initialize_cars_from_pairs(origin_destination_pairs)
-        else:
+        elif num_of_cars and num_of_cars > 0:
             self.cars = self.randomize_cars(num_of_cars)
+        else:
+            raise Exception("Need to specify either non-zero num_of_cars for randomization or origin_destination_pairs")
+        self.times = [math.inf]*len(self.cars)
         self.setup_light_timers()
 
     # moves all cars which are currently free to move
