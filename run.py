@@ -1,30 +1,51 @@
 from traffic_simulation import TrafficSimulation
 from constants import *
+from typing import List
+from intersection import Intersection
+from traffic_simulation import random_intersection_placement
+import threading
+import random
 
-# AI function will go in this file where we will simulate the game. We can think of the game as a black box.
-# We will simply pass in inputs to the simulation and we will get some answer that we then try to minimize.
+def stop_all_threads():
+    for thread in threading.enumerate():
+        if thread != threading.current_thread():
+            thread.join()
 
-#TODO 
-#Inputs: 
-# # the AI inputs are the matrix of stoplights and stopsigns
-# for a 3 by 3 intersection
-#example [0 ,1, 0]
-#        [0, 1, 1]
-#        [0, 1  0]
-# where 1 represents a stoplight and 0 represents a stopsign
-#Output: Avg time to get to destination
+def run_simulations_on(candidate: List[List[Intersection]], num_of_cars: int, runs_per_candidate: int):
+    results = []
+    for _ in range(runs_per_candidate):
+        ts = TrafficSimulation(num_of_cars=num_of_cars, matrix=candidate)
+        result = ts.run()
+        results.append(result)
+        stop_all_threads()
+    return sum(results) / len(results)
 
-# function for runnning the game
+def mutate(candidate: List[List[Intersection]]):
+    # not implemented
+    return candidate
 
-# instantiates a traffic simulation and runs it until all cars are at their destination. 
-# routes are randomized so the simulation is different each time
-# returns the average time to destination
+def crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
+    # not implemented
+    return candidate1
 
-def simulate(ai_inputs):
-    ts = TrafficSimulation(num_of_cars=10, matrix=ai_inputs)
-    while True:        
-        ts.update_car_positions()
-        if ts.done():
-            result = ts.result()
-            break
-    return result
+def create_new_candidates(best_half: List[List[Intersection]], candidate_count: int):
+    # results should be of length candidate_count - len(best_half)
+    # not implemented
+    results = []
+    for _ in range(candidate_count - len(best_half)):
+        results.append(random.choice(best_half))
+    return results
+
+def genetic_algorithm(width: int, height: int, num_of_cars: int, candidate_count: int, runs_per_candidate: int):
+    # start with random candidates
+    candidates = [random_intersection_placement(width, height) for _ in range(candidate_count)]
+    while True:
+        results = [(candidate, run_simulations_on(candidate, num_of_cars, runs_per_candidate)) for candidate in candidates]
+        sorted_results = sorted(results, key=lambda x: x[1])    
+        best_half = [candidate for candidate, score in sorted_results[:len(candidates)//2]]
+        new_candidates = create_new_candidates(best_half, candidate_count)
+        candidates = best_half + new_candidates
+
+if __name__ == '__main__':
+    print(POSSIBLE_LIGHT_DURATIONS)
+    genetic_algorithm(width=3, height=3, num_of_cars=3, candidate_count=4, runs_per_candidate=2)

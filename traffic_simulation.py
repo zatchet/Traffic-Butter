@@ -15,7 +15,7 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
         for x in range(0, width):
             random_intersection = random.choice([0, 1, 2])
             if random_intersection == 0:
-                matrix[y][x] = StopLight(duration = random.choice([5,10]), y_axis_green=random.choice([True, False]))
+                matrix[y][x] = StopLight(duration = random.choice(POSSIBLE_LIGHT_DURATIONS), y_axis_green=random.choice([True, False]))
             elif random_intersection == 1:
                 matrix[y][x] = FourWayStopSign()
             elif random_intersection == 2:
@@ -95,13 +95,13 @@ class TrafficSimulation:
     # place cars randomly on the map
     def initialize_cars(self, num_of_cars):
         cars = []
-        for _ in range(num_of_cars):
+        for i in range(num_of_cars):
             source = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             destination = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             color = random.choice(CAR_COLORS)
             route = RouteFinder().generate_route(source, destination, self.matrix)
             initial_direction = route[0] if len(route) > 0 else Direction.up
-            car = Car(initial_direction, source, destination, color, route)
+            car = Car(i, initial_direction, source, destination, color, route)
             cars.append(car)
 
         # manual routes for debugging
@@ -114,8 +114,12 @@ class TrafficSimulation:
         # c6 = Car(Direction(0), Pos(4,7), Pos(4,2), 'green', [Direction.up]*5)
         # cars = [c2, c3, c4, c5, c6]
         # print('route', c1.route)
-
         return cars
+    
+    def run(self):
+        while not self.done():
+            self.update_car_positions()
+        return self.result()
 
 
 

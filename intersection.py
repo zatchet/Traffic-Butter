@@ -1,4 +1,3 @@
-import random
 import threading
 from direction import Direction
 from constants import *
@@ -21,6 +20,8 @@ class StopLight(Intersection):
 
     # every duration seconds, flip the light
     def flip_light(self, ts):
+        if ts.done():
+            return
         self.y_axis_green = not self.y_axis_green
         queues_to_be_processed = [queue.copy() for queue in self.queues.values() if len(queue) > 0]
         if len(queues_to_be_processed) > 2:
