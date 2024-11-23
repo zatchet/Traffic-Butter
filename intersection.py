@@ -52,11 +52,15 @@ class StopLight(Intersection):
                 return
         if direction in [Direction.up, Direction.down] and self.y_axis_green:
             # green light, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            timer = threading.Timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
+            timer.daemon = True
+            timer.start()
             return
         if direction in [Direction.left, Direction.right] and not self.y_axis_green:
             # green light, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            timer = threading.Timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
+            timer.daemon = True
+            timer.start()
             return
         # red light, add to proper queue
         self.queues[direction].append((car_index, next_direction))
@@ -89,11 +93,15 @@ class TwoWayStopSign(Intersection):
     def join(self, car_index, direction, next_direction, ts):
         if direction in [Direction.up, Direction.down] and self.y_axis_free:
             # no stop, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            timer = threading.Timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
+            timer.daemon = True
+            timer.start()
             return
         if direction in [Direction.left, Direction.right] and not self.y_axis_free:
             # no stop, immediately let the car through
-            ts.release_car_from_queue(car_index)
+            timer = threading.Timer(MOVEMENT_DELAY, ts.release_car_from_queue, kwargs={'car_index': car_index})
+            timer.daemon = True
+            timer.start()
             return
         # stop sign, add to proper queue
         self.queues[direction].append(car_index)
