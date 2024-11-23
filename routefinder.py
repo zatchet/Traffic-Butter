@@ -21,7 +21,7 @@ class RouteFinder:
         
         def get_intersection_cost(pos: Pos, direction: Direction) -> float:
             """Cost of passing through an intersection"""
-            if pos.x <= 0 or pos.y <= 0 or pos.x >= len(grid[0]) or pos.y >= len(grid):
+            if pos.x < 0 or pos.y < 0 or pos.x >= len(grid[0]) or pos.y >= len(grid):
                 return float('inf')
             
             intersection = grid[pos.y][pos.x]
@@ -70,7 +70,7 @@ class RouteFinder:
                 next_pos = Pos(current.x + dir_vals[0], current.y + dir_vals[1])
                 
                 # Skip if out of bounds
-                if (next_pos.x <= 0 or next_pos.y <= 0 or 
+                if (next_pos.x < 0 or next_pos.y < 0 or 
                     next_pos.x >= len(grid[0]) or next_pos.y >= len(grid)):
                     continue
                 

@@ -10,9 +10,9 @@ from routefinder import RouteFinder
 from constants import *
 
 def random_intersection_placement(width: int, height: int) -> List[List[Intersection]]:
-    matrix = [[None for _ in range(width + 1)] for _ in range(height + 1)]
-    for y in range(1, height + 1):
-        for x in range(1, width + 1):
+    matrix = [[None for _ in range(width)] for _ in range(height)]
+    for y in range(0, height):
+        for x in range(0, width):
             random_intersection = random.choice([0, 1, 2])
             if random_intersection == 0:
                 matrix[y][x] = StopLight(duration = random.choice([5,10]), y_axis_green=random.choice([True, False]))
@@ -62,7 +62,7 @@ class TrafficSimulation:
             self.times[car_index] = time.time() - self.start_time
             return
         
-        if not (0 < new_x < self.width and 0 < new_y < self.height):
+        if not (0 <= new_x < self.width and 0 <= new_y < self.height):
             # print("moving car out of bounds")
             return
         
@@ -79,8 +79,8 @@ class TrafficSimulation:
 
     def setup_light_timers(self):
         # Initialize threads for all intersections
-        for y in range(1, self.height):
-            for x in range(1, self.width):
+        for y in range(0, self.height):
+            for x in range(0, self.width):
                 intersection = self.matrix[y][x]
                 if isinstance(intersection, StopLight):
                     intersection.flip_light(self)
@@ -96,8 +96,8 @@ class TrafficSimulation:
     def initialize_cars(self, num_of_cars):
         cars = []
         for _ in range(num_of_cars):
-            source = Pos(random.randint(1, self.width-1), random.randint(1, self.height-1))
-            destination = Pos(random.randint(1, self.width-1), random.randint(1, self.height-1))
+            source = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            destination = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
             color = random.choice(CAR_COLORS)
             route = RouteFinder().generate_route(source, destination, self.matrix)
             initial_direction = route[0] if len(route) > 0 else Direction.up
