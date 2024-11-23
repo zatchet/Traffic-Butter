@@ -40,6 +40,7 @@ def genetic_algorithm(width: int, height: int, num_of_cars: int, candidate_count
     # start with random candidates
     candidates = [random_intersection_placement(width, height) for _ in range(candidate_count)]
     while True:
+        # should check out the multiprocessing package to run candidates in parallel
         results = [(candidate, run_simulations_on(candidate, num_of_cars, runs_per_candidate)) for candidate in candidates]
         sorted_results = sorted(results, key=lambda x: x[1])    
         best_half = [candidate for candidate, score in sorted_results[:len(candidates)//2]]

@@ -31,9 +31,9 @@ class TrafficSimulation:
         if self.height < 2 or self.width < 2 or num_of_cars <= 0:
             raise Exception("Invalid input to Traffic Simulation")
         self.matrix = matrix
-        self.cars = self.initialize_cars(num_of_cars)
         self.start_time = time.time()
         self.times = [math.inf]*num_of_cars
+        self.cars = self.initialize_cars(num_of_cars)
         self.setup_light_timers()
 
     # moves all cars which are currently free to move
@@ -103,6 +103,9 @@ class TrafficSimulation:
             initial_direction = route[0] if len(route) > 0 else Direction.up
             car = Car(i, initial_direction, source, destination, color, route)
             cars.append(car)
+            if car.at_destination():
+                car.finished = True
+                self.times[car.id] = time.time() - self.start_time
 
         # manual routes for debugging
         # route = RouteFinder().generate_route(Pos(4,8), Pos(4,8), self.matrix)

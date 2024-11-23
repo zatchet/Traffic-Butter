@@ -16,9 +16,6 @@ class Car:
         self.finished = False
         self.route = route
         self.route_index = 0 # keeps track of where the car is along its route
-        if self.at_destination():
-            self.color = 'black'
-            self.finished = True
 
     def __str__(self):
         return f"Car at {self.curr_pos}, coming from direction {self.on_side}, orginating from{self.source}, and heading to {self.dest}"
