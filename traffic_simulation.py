@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from car import Car
 from pos import Pos
 from direction import Direction
@@ -25,7 +25,8 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 # Main logic for the Traffic Simulation 
 # Pygame should not be in this file
 class TrafficSimulation:
-    def __init__(self, num_of_cars, matrix: List[List[Intersection]] = random_intersection_placement(GRID_SIZE_X, GRID_SIZE_Y)):
+    def __init__(self, num_of_cars, origin_destination_pairs: List[Tuple[Pos, Pos]] = None, 
+                 matrix: List[List[Intersection]] = random_intersection_placement(GRID_SIZE_X, GRID_SIZE_Y)):
         self.height = len(matrix)
         self.width = len(matrix[0])
         if self.height < 2 or self.width < 2 or num_of_cars <= 0:
@@ -33,7 +34,10 @@ class TrafficSimulation:
         self.matrix = matrix
         self.start_time = time.time()
         self.times = [math.inf]*num_of_cars
-        self.cars = self.initialize_cars(num_of_cars)
+        if origin_destination_pairs:
+            self.cars = self.initialize_cars_from_pairs(origin_destination_pairs)
+        else:
+            self.cars = self.randomize_cars(num_of_cars)
         self.setup_light_timers()
 
     # moves all cars which are currently free to move
@@ -91,13 +95,10 @@ class TrafficSimulation:
     
     def done(self):
         return all(car.finished for car in self.cars)
-
-    # place cars randomly on the map
-    def initialize_cars(self, num_of_cars):
+    
+    def initialize_cars_from_pairs(self, origin_destination_pairs: List[Tuple[Pos, Pos]]):
         cars = []
-        for i in range(num_of_cars):
-            source = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
-            destination = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+        for i, (source, destination) in enumerate(origin_destination_pairs):
             color = random.choice(CAR_COLORS)
             route = RouteFinder().generate_route(source, destination, self.matrix)
             initial_direction = route[0] if len(route) > 0 else Direction.up
@@ -106,6 +107,16 @@ class TrafficSimulation:
             if car.at_destination():
                 car.finished = True
                 self.times[car.id] = time.time() - self.start_time
+        return cars
+
+    # place cars randomly on the map
+    def randomize_cars(self, num_of_cars):
+        random_origin_destination_pairs = []
+        for _ in range(num_of_cars):
+            random_source = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            random_destination = Pos(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+            random_origin_destination_pairs.append((random_source, random_destination))
+        return self.initialize_cars_from_pairs(random_origin_destination_pairs)
 
         # manual routes for debugging
         # route = RouteFinder().generate_route(Pos(4,8), Pos(4,8), self.matrix)
@@ -117,7 +128,6 @@ class TrafficSimulation:
         # c6 = Car(Direction(0), Pos(4,7), Pos(4,2), 'green', [Direction.up]*5)
         # cars = [c2, c3, c4, c5, c6]
         # print('route', c1.route)
-        return cars
     
     def run(self):
         while not self.done():
