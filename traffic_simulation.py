@@ -26,12 +26,12 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 # Pygame should not be in this file
 class TrafficSimulation:
     def __init__(self, num_of_cars = None, origin_destination_pairs: List[Tuple[Pos, Pos]] = None, 
-                 matrix: List[List[Intersection]] = random_intersection_placement(GRID_SIZE_X, GRID_SIZE_Y)):
-        self.height = len(matrix)
-        self.width = len(matrix[0])
+                 matrix: List[List[Intersection]] = None):
+        self.matrix = matrix if matrix else random_intersection_placement(GRID_SIZE_X, GRID_SIZE_Y)
+        self.height = len(self.matrix)
+        self.width = len(self.matrix[0])
         if self.height < 2 or self.width < 2:
             raise Exception("Invalid input to Traffic Simulation")
-        self.matrix = matrix
         self.start_time = time.time()
         if origin_destination_pairs and num_of_cars:
             raise Exception("Cannot specify both num_of_cars and origin_destination_pairs")

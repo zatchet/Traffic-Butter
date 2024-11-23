@@ -7,21 +7,35 @@ import threading
 import random
 from multiprocessing import Pool
 import time
-from functools import partial
+from pos import Pos
+
+## only one of the following variables should be non-None at a time
+# set this variable if we want to have consistent origin-destination pairs across the entire algorithm
+ORIGIN_DESTINATION_PAIRS = [(Pos(0, 0), Pos(5, 5))]
+# set this variable if we want to randomize car origin/destinations every simulation
+NUM_OF_CARS = None
+
+GRID_WIDTH = 6
+GRID_HEIGHT = 6
+CANDIDATE_COUNT = 10
+RUNS_PER_CANDIDATE = 4
 
 def stop_all_threads():
     for thread in threading.enumerate():
         if thread != threading.current_thread():
             thread.join()
 
-def run_simulations_on(candidate: List[List[Intersection]], num_of_cars: int, runs_per_candidate: int):
+def run_simulations_on(candidate: List[List[Intersection]]):
     results = []
-    for _ in range(runs_per_candidate):
-        #print(f"Running simulation {i}")
-        ts = TrafficSimulation(num_of_cars=num_of_cars, matrix=candidate)
+    for _ in range(RUNS_PER_CANDIDATE):
+        if ORIGIN_DESTINATION_PAIRS:
+            ts = TrafficSimulation(matrix=candidate, origin_destination_pairs=ORIGIN_DESTINATION_PAIRS)
+        elif NUM_OF_CARS:
+            ts = TrafficSimulation(matrix=candidate, num_of_cars=NUM_OF_CARS)
         result = ts.run()
         results.append(result)
         stop_all_threads()
+    print(results)
     return (candidate, sum(results) / len(results))
 
 def mutate(candidate: List[List[Intersection]]):
@@ -33,31 +47,29 @@ def crossover(candidate1: List[List[Intersection]], candidate2: List[List[Inters
     return candidate1
 
 def create_new_candidates(best_half: List[List[Intersection]], candidate_count: int):
-    # results should be of length candidate_count - len(best_half)
+    # result should be of length candidate_count - len(best_half)
     # not implemented
     results = []
     for _ in range(candidate_count - len(best_half)):
         results.append(random.choice(best_half))
     return results
 
-def collect_results(candidates, num_of_cars, runs_per_candidate):
-    # Prepare arguments for each candidate
-    func = partial(run_simulations_on, num_of_cars=num_of_cars, runs_per_candidate=runs_per_candidate)
+def collect_results(candidates):
     # Run candidates in parallel
     with Pool(len(candidates)) as p:
-        return p.map(func, candidates)
+        return p.map(run_simulations_on, candidates)
 
-def genetic_algorithm(width: int, height: int, num_of_cars: int, candidate_count: int, runs_per_candidate: int):
+def genetic_algorithm():
     # start with random candidates
-    candidates = [random_intersection_placement(width, height) for _ in range(candidate_count)]
+    candidates = [random_intersection_placement(GRID_WIDTH, GRID_HEIGHT) for _ in range(CANDIDATE_COUNT)]
     while True:
-        results = collect_results(candidates, num_of_cars, runs_per_candidate)
+        results = collect_results(candidates)
+        # print([result for candidate, result in results])
         sorted_results = sorted(results, key=lambda x: x[1])    
         best_half = [candidate for candidate, score in sorted_results[:len(candidates)//2]]
-        new_candidates = create_new_candidates(best_half, candidate_count)
+        new_candidates = create_new_candidates(best_half, CANDIDATE_COUNT)
         candidates = best_half + new_candidates
 
 if __name__ == '__main__':
     start_time = time.time()
-    print(POSSIBLE_LIGHT_DURATIONS)
-    genetic_algorithm(width=3, height=3, num_of_cars=3, candidate_count=4, runs_per_candidate=2)
+    genetic_algorithm()
