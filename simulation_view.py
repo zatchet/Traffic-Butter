@@ -2,15 +2,17 @@ import pygame
 from intersection import StopLight, FourWayStopSign, TwoWayStopSign
 from traffic_simulation import TrafficSimulation
 from constants import *
-       
+from direction import Direction
 # Represents all information to rendering the game
+
 class GameLoop:
     def __init__(self):
-        self.traffic_simulation = TrafficSimulation(num_of_cars=100)
+        self.traffic_simulation = TrafficSimulation(num_of_cars=15)
         self.cell_size = min(MAX_SCREEN_SIZE // self.traffic_simulation.height, MAX_SCREEN_SIZE // self.traffic_simulation.width)
         self.screen_height = int(self.cell_size * self.traffic_simulation.height)
         self.screen_width = int(self.cell_size * self.traffic_simulation.width)
-        self.CAR_SIZE = self.cell_size / 4
+        self.car_length = self.cell_size / 4
+        self.car_width = self.car_length / 2
 
     def drawGrid(self, screen):
         for y in range(0, self.screen_height, self.cell_size):
@@ -20,19 +22,33 @@ class GameLoop:
 
     def drawCars(self, screen):
         for car in self.traffic_simulation.cars:
-            x = car.curr_pos.x
-            y = car.curr_pos.y
-            location = car.on_side
-            dir_val_x = location.math_dirs()[0]
-            dir_val_y = location.math_dirs()[1]
-            rect = pygame.Rect((x*self.cell_size) + (0 if (dir_val_x >= 0) else -self.CAR_SIZE), 
-                               (y*self.cell_size) + (0 if (dir_val_y >= 0) else -self.CAR_SIZE), 
-                               self.CAR_SIZE + (-abs(dir_val_y)*(self.CAR_SIZE/2)), 
-                               self.CAR_SIZE + (-abs(dir_val_x)*(self.CAR_SIZE/2)))
+            x, y = car.curr_pos.x, car.curr_pos.y
+            direction = car.on_side
+            triangle_length = self.car_width
+
+            if direction == Direction.up:
+                rect = pygame.Rect((x*self.cell_size), (y*self.cell_size) + 2*triangle_length, self.car_width, self.car_length)
+                triangle_points = [(x*self.cell_size, y*self.cell_size + 2*triangle_length),
+                      (x*self.cell_size + triangle_length, y*self.cell_size + 2*triangle_length),
+                      (x*self.cell_size + triangle_length/2, y*self.cell_size + triangle_length)]
+            if direction == Direction.down:
+                rect = pygame.Rect((x*self.cell_size) - self.car_width, (y*self.cell_size) - self.car_length - 2*triangle_length, self.car_width, self.car_length)
+                triangle_points = [(x*self.cell_size - triangle_length, y*self.cell_size - 2*triangle_length),
+                      (x*self.cell_size, y*self.cell_size - 2*triangle_length),
+                      (x*self.cell_size - triangle_length/2, y*self.cell_size - triangle_length)]
+            if direction == Direction.left:
+                rect = pygame.Rect((x*self.cell_size) + 2*triangle_length, (y*self.cell_size) - self.car_width, self.car_length, self.car_width)
+                triangle_points = [(x*self.cell_size + 2*triangle_length, y*self.cell_size),
+                      (x*self.cell_size + 2*triangle_length, y*self.cell_size - triangle_length),
+                      (x*self.cell_size + triangle_length, y*self.cell_size - triangle_length/2)]
+            if direction == Direction.right:
+                rect = pygame.Rect((x*self.cell_size) - self.car_length - 2*triangle_length, (y*self.cell_size), self.car_length, self.car_width)
+                triangle_points = [(x*self.cell_size - 2*triangle_length, y*self.cell_size),
+                      (x*self.cell_size - 2*triangle_length, y*self.cell_size + triangle_length),
+                      (x*self.cell_size - triangle_length, y*self.cell_size + triangle_length/2)]
+            
             pygame.draw.rect(screen, car.color, rect, 0)
-            pygame.draw.circle(screen, car.color,(((x*self.cell_size) + (dir_val_x*(self.CAR_SIZE*1.25))+ ((self.CAR_SIZE/4) if dir_val_x == 0 else 0)), 
-                                                  ((y*self.cell_size) + (dir_val_y*(self.CAR_SIZE*1.25))+ ((self.CAR_SIZE/4) if dir_val_y == 0 else 0))), 
-                                                  (self.CAR_SIZE/4))
+            pygame.draw.polygon(screen, car.color, triangle_points)
 
     def draw_intersection_elements(self, screen):
         for y in range(1, self.traffic_simulation.height):
