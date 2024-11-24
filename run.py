@@ -29,7 +29,7 @@ SURVIVOR_COUNT = POPULATION_SIZE // 2 # the top half of candidates are preserved
 RUNS_PER_CANDIDATE = 5
 
 MUTATION_RATE_INITIAL = 0.9
-MUTATION_DECAY_RATE = 0.95
+MUTATION_DECAY_RATE = 0.9
 
 CONVERGENCE_THRESHOLD = 6 # number of generations without improvement in order to declare a local optimum
 
