@@ -6,33 +6,34 @@ from traffic_simulation import random_matrix, random_intersection
 import threading
 import random
 from multiprocessing import Pool
-import time
 from pos import Pos
 from intersection import StopLight, FourWayStopSign, TwoWayStopSign
 from simulation_view import SimulationView
 import os
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 GRID_WIDTH = 6
-GRID_HEIGHT = 6
+GRID_HEIGHT = 3
 
 ## only one of the following variables should be non-None at a time
 # set this variable if we want to have consistent origin-destination pairs across the entire algorithm
 ORIGIN_DESTINATION_PAIRS = [(Pos(random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)), 
-                             Pos(random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1))) for _ in range(50)]
+                             Pos(random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1))) for _ in range(100)]
 # set this variable if we want to randomize car origin/destinations every simulation
 NUM_OF_CARS = None
 
-INITIAL_CANDIDATE_COUNT = 10
-SURVIVOR_COUNT = 5 # the top SURVIVOR_COUNT candidates are preserved for the next generation
+POPULATION_SIZE = 20
+SURVIVOR_COUNT = POPULATION_SIZE // 2 # the top half of candidates are preserved for the next generation
 
 RUNS_PER_CANDIDATE = 3
 
 MUTATION_RATE_INITIAL = 0.9
-MUTATION_DECAY_RATE = 0.9
+MUTATION_DECAY_RATE = 0.95
 
-CONVERGENCE_THRESHOLD = 5 # number of generations without improvement
-NUM_RESTARTS = 5
+CONVERGENCE_THRESHOLD = 6 # number of generations without improvement in order to declare a local optimum
+
+NUM_RESTARTS = 3
 
 def stop_all_threads():
     for thread in threading.enumerate():
@@ -63,8 +64,18 @@ def intersection_type_crossover(candidate1: List[List[Intersection]], candidate2
                 new_candidate[y].append(candidate2[y][x])
     return new_candidate
 
+def alternating_row_crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
+    # builds a new candidate by alternating between the two parents row by row
+    new_candidate = []
+    for y in range(len(candidate1)):
+        if y % 2 == 0:
+            new_candidate.append(candidate1[y])
+        else:
+            new_candidate.append(candidate2[y])
+    return new_candidate
+
 def checkerboard_crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
-    # builds a new candidate by alternating between the two parents
+    # builds a new candidate by alternating between the two parents every cell
     new_candidate = []
     for y in range(len(candidate1)):
         new_candidate.append([])
@@ -74,6 +85,12 @@ def checkerboard_crossover(candidate1: List[List[Intersection]], candidate2: Lis
             else:
                 new_candidate[y].append(candidate2[y][x])
     return new_candidate
+
+def crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
+    if random.random() < 0.5:
+        return checkerboard_crossover(candidate1, candidate2)
+    else:
+        return alternating_row_crossover(candidate1, candidate2)
 
 def mutate(candidate: List[List[Intersection]]):
     mutated_candidate = candidate.copy()
@@ -89,36 +106,32 @@ def mutate(candidate: List[List[Intersection]]):
         # tweak property of intersection
         if isinstance(intersection, StopLight):
             if random.random() < 0.5:
-                new_duration_pattern = (intersection.duration_pattern[0] + random.choice([-1*SCALE_FACTOR, 1*SCALE_FACTOR]), intersection.duration_pattern[1])
+                new_duration_pattern = (random.choice(POSSIBLE_LIGHT_DURATIONS), intersection.duration_pattern[1])
             else:
-                new_duration_pattern = (intersection.duration_pattern[0], intersection.duration_pattern[1] + random.choice([-1*SCALE_FACTOR, 1*SCALE_FACTOR]))
+                new_duration_pattern = (intersection.duration_pattern[0], random.choice(POSSIBLE_LIGHT_DURATIONS))
             mutated_candidate[y][x] = StopLight(new_duration_pattern)
         elif isinstance(intersection, TwoWayStopSign):
             new_y_axis_free = not intersection.y_axis_free
             mutated_candidate[y][x] = TwoWayStopSign(new_y_axis_free)
     return mutated_candidate
 
-def crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
-    if random.random() < 0.5:
-        return checkerboard_crossover(candidate1, candidate2)
-    else:
-        return intersection_type_crossover(candidate1, candidate2)
-
-def create_new_candidates(survivors: List[List[Intersection]], mutation_rate: float):
-    results = []
+def get_new_candidates(survivors: List[List[Intersection]], mutation_rate: float):
+    new_candidates = []
     for candidate in survivors:
+        other_candidate = random.choice([c for c in survivors if c != candidate])
+        new_candidates.append(crossover(candidate, other_candidate))
+    result = survivors + new_candidates
+
+    # apply mutations
+    for i in range(len(result)):
         if random.random() < mutation_rate:
-            print("mutating")
-            new_candidate = mutate(candidate)
-        else:
-            print("crossover")
-            other_candidate = random.choice([c for c in survivors if c != candidate])
-            new_candidate = crossover(candidate, other_candidate)
-        results.append(new_candidate)
+            result[i] = mutate(result[i])
+    
     if random.random() < 0.1:
         # spawn in a new random candidate to keep population diverse
-        results.append(random_matrix(GRID_WIDTH, GRID_HEIGHT))
-    return results
+        result.append(random_matrix(GRID_WIDTH, GRID_HEIGHT))
+
+    return result
 
 def collect_results(candidates):
     # Run candidates in parallel
@@ -128,31 +141,35 @@ def collect_results(candidates):
 def genetic_algorithm():
     # start with random candidates
     print("Starting genetic algorithm")
-    running_best = (None, float('inf'))
+    best_overall = (None, float('inf'))
     for i in range(NUM_RESTARTS):
-        candidates = [random_matrix(GRID_WIDTH, GRID_HEIGHT) for _ in range(INITIAL_CANDIDATE_COUNT)]
+        candidates = [random_matrix(GRID_WIDTH, GRID_HEIGHT) for _ in range(POPULATION_SIZE)]
         mutation_rate = MUTATION_RATE_INITIAL
+        generation_count = 0
         generations_without_improvement = 0
+        best_from_this_restart = (None, float('inf'))
         while True:
-            print(f'Running simulations on new generation with mutation rate {mutation_rate}, restart {i}, current best {running_best[1]}')
+            print(f'Running simulations on new generation {generation_count} of restart {i} with mutation rate {mutation_rate}. Best from this restart {best_from_this_restart[1]}, best overall {best_overall[1]}')
             results = collect_results(candidates)
             # print([result for candidate, result in results])
             sorted_results = sorted(results, key=lambda x: x[1])    
             survivors = [candidate for candidate, score in sorted_results[:SURVIVOR_COUNT]]
             best_from_this_generation = sorted_results[0]
-            if best_from_this_generation[1] < running_best[1]:
-                print(f"New best result: {best_from_this_generation[1]}")
-                running_best = best_from_this_generation
+            if best_from_this_generation[1] < best_from_this_restart[1]:
+                print(f'New best result from this restart: {best_from_this_generation[1]}')
+                best_from_this_restart = best_from_this_generation
                 generations_without_improvement = 0
             else:
                 generations_without_improvement += 1
-            if generations_without_improvement >= CONVERGENCE_THRESHOLD:
-                print(f"Converged, restarting from scratch")
-                break
-            new_candidates = create_new_candidates(survivors, mutation_rate)
+                if generations_without_improvement >= CONVERGENCE_THRESHOLD:
+                    print('arrived at local optimum, restarting from scratch')
+                    break
+            candidates = get_new_candidates(survivors, mutation_rate)
             mutation_rate *= MUTATION_DECAY_RATE
-            candidates = survivors + new_candidates
-    return running_best
+        if best_from_this_restart[1] < best_overall[1]:
+            print(f'New best result overall: {best_from_this_restart[1]}')
+            best_overall = best_from_this_restart
+    return best_overall
 
 def draw_solution(solution: List[List[Intersection]]):
     view = SimulationView(TrafficSimulation(matrix=solution, num_of_cars=200), draw_cars=False)
