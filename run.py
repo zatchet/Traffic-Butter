@@ -26,7 +26,7 @@ NUM_OF_CARS = None
 POPULATION_SIZE = 20
 SURVIVOR_COUNT = POPULATION_SIZE // 2 # the top half of candidates are preserved for the next generation
 
-RUNS_PER_CANDIDATE = 3
+RUNS_PER_CANDIDATE = 5
 
 MUTATION_RATE_INITIAL = 0.9
 MUTATION_DECAY_RATE = 0.95
@@ -139,17 +139,17 @@ def collect_results(candidates):
         return p.map(run_simulations_on, candidates)
 
 def genetic_algorithm():
-    # start with random candidates
     print("Starting genetic algorithm")
     best_overall = (None, float('inf'))
     for i in range(NUM_RESTARTS):
+        # start with random candidates
         candidates = [random_matrix(GRID_WIDTH, GRID_HEIGHT) for _ in range(POPULATION_SIZE)]
         mutation_rate = MUTATION_RATE_INITIAL
         generation_count = 0
         generations_without_improvement = 0
         best_from_this_restart = (None, float('inf'))
         while True:
-            print(f'Running simulations on new generation {generation_count} of restart {i} with mutation rate {mutation_rate}. Best from this restart {best_from_this_restart[1]}, best overall {best_overall[1]}')
+            print(f'Running simulations on generation {generation_count} of restart {i} with mutation rate {mutation_rate}. Best from this restart {best_from_this_restart[1]}, best overall {best_overall[1]}')
             results = collect_results(candidates)
             # print([result for candidate, result in results])
             sorted_results = sorted(results, key=lambda x: x[1])    
@@ -166,6 +166,7 @@ def genetic_algorithm():
                     break
             candidates = get_new_candidates(survivors, mutation_rate)
             mutation_rate *= MUTATION_DECAY_RATE
+            generation_count += 1
         if best_from_this_restart[1] < best_overall[1]:
             print(f'New best result overall: {best_from_this_restart[1]}')
             best_overall = best_from_this_restart

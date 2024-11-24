@@ -1,7 +1,7 @@
 # tweak this to change the simulation speed
 SCALE_FACTOR = .1
 
-LIGHT_RELEASE_RATE = 1*SCALE_FACTOR # when the light turns green, cars that were in queue go through it every LIGHT_RELEASE_RATE seconds
+LIGHT_RELEASE_RATE = .9*SCALE_FACTOR # when the light turns green, cars that were in queue go through it every LIGHT_RELEASE_RATE seconds
 STOP_SIGN_RELEASE_RATE = 2*SCALE_FACTOR # every STOP_SIGN_RELEASE_RATE seconds, a car is released from the stop sign
 LEFT_TURN_PENALTY = 0.5*SCALE_FACTOR # when a car turns left, it has to wait an additional LEFT_TURN_PENALTY seconds
 MOVEMENT_DELAY = 0.5*SCALE_FACTOR # time it takes a car to move one cell (e.g. through a green light)
