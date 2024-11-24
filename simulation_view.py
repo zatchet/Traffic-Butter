@@ -78,7 +78,7 @@ class SimulationView:
 
     # begins the simuation
     def start(self):
-        self.loop_gui()
+        return self.loop_gui()
 
     def refresh(self, screen):
         screen.fill(WHITE)
@@ -102,18 +102,18 @@ class SimulationView:
             
             self.traffic_simulation.update_car_positions()
             
-            # if self.traffic_simulation.done():
-            #     self.refresh(screen)
-            #     result = self.traffic_simulation.result()
-            #     break
+            if self.traffic_simulation.done():
+                self.drawCars(screen)
+                result = self.traffic_simulation.result()
+                break
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-        
-        print(f"average time to destination: {result} seconds")
-        pygame.quit()
 
+        pygame.quit()
+        return result
+    
 if __name__ == "__main__":
     view = SimulationView(TrafficSimulation(num_of_cars=5), draw_cars=True)
     view.start()

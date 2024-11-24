@@ -12,21 +12,36 @@ from simulation_view import SimulationView
 import os
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+os.environ['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = "YES"  # Add this line
 
-GRID_WIDTH = 6
-GRID_HEIGHT = 3
+
+GUI = True
+
+GRID_WIDTH = 5
+GRID_HEIGHT = 5
 
 ## only one of the following variables should be non-None at a time
 # set this variable if we want to have consistent origin-destination pairs across the entire algorithm
-ORIGIN_DESTINATION_PAIRS = [(Pos(random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1)), 
-                             Pos(random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1))) for _ in range(100)]
+ORIGIN_DESTINATION_PAIRS = [(Pos(0, 0), Pos(GRID_WIDTH - 1, GRID_HEIGHT - 1)), 
+                            (Pos(0, 0), Pos(GRID_WIDTH - 1, 0)),
+                            (Pos(0, 0), Pos(0, GRID_HEIGHT - 1)),
+                            (Pos(GRID_WIDTH - 1, GRID_HEIGHT - 1), Pos(GRID_WIDTH - 1, 0)),
+                            (Pos(GRID_WIDTH - 1, GRID_HEIGHT - 1), Pos(0, GRID_HEIGHT - 1)),
+                            (Pos(GRID_WIDTH - 1, GRID_HEIGHT - 1), Pos(0, 0)),
+                            (Pos(GRID_WIDTH - 1, 0), Pos(GRID_WIDTH - 1, GRID_HEIGHT - 1)),
+                            (Pos(GRID_WIDTH - 1, 0), Pos(0, GRID_HEIGHT - 1)),
+                            (Pos(GRID_WIDTH - 1, 0), Pos(0, 0)),
+                            (Pos(0, GRID_HEIGHT - 1), Pos(GRID_WIDTH - 1, GRID_HEIGHT - 1)),
+                            (Pos(0, GRID_HEIGHT - 1), Pos(GRID_WIDTH - 1, 0)),
+                            (Pos(0, GRID_HEIGHT - 1), Pos(0, 0))]*4
+                            
 # set this variable if we want to randomize car origin/destinations every simulation
 NUM_OF_CARS = None
 
 POPULATION_SIZE = 20
 SURVIVOR_COUNT = POPULATION_SIZE // 2 # the top half of candidates are preserved for the next generation
 
-RUNS_PER_CANDIDATE = 5
+RUNS_PER_CANDIDATE = 1
 
 MUTATION_RATE_INITIAL = 0.9
 MUTATION_DECAY_RATE = 0.9
@@ -47,7 +62,10 @@ def run_simulations_on(candidate: List[List[Intersection]]):
             ts = TrafficSimulation(matrix=candidate, origin_destination_pairs=ORIGIN_DESTINATION_PAIRS)
         elif NUM_OF_CARS:
             ts = TrafficSimulation(matrix=candidate, num_of_cars=NUM_OF_CARS)
-        result = ts.run()
+        if GUI:
+            result = SimulationView(ts, draw_cars=True).start()
+        else:
+            result = ts.run()
         results.append(result)
         stop_all_threads()
     return (candidate, sum(results) / len(results))
@@ -173,7 +191,7 @@ def genetic_algorithm():
     return best_overall
 
 def draw_solution(solution: List[List[Intersection]]):
-    view = SimulationView(TrafficSimulation(matrix=solution, num_of_cars=200), draw_cars=False)
+    view = SimulationView(TrafficSimulation(matrix=solution, num_of_cars=1000), draw_cars=False)
     view.start()
 
 if __name__ == '__main__':

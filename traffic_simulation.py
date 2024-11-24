@@ -115,6 +115,7 @@ class TrafficSimulation:
             cars.append(car)
             if car.at_destination():
                 car.finished = True
+                car.color = 'black'
                 self.times[car.id] = time.time() - self.start_time
         return cars
 
