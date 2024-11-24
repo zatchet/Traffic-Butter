@@ -5,9 +5,10 @@ from constants import *
 from direction import Direction
 # Represents all information to rendering the game
 
-class GameLoop:
-    def __init__(self):
-        self.traffic_simulation = TrafficSimulation(num_of_cars=5)
+class SimulationView:
+    def __init__(self, traffic_simulation: TrafficSimulation, draw_cars: bool = True):
+        self.draw_cars = draw_cars
+        self.traffic_simulation = traffic_simulation
         self.cell_size = min(MAX_SCREEN_SIZE // (self.traffic_simulation.height + 1), MAX_SCREEN_SIZE // (self.traffic_simulation.width + 1))
         self.screen_height = int(self.cell_size * (self.traffic_simulation.height + 1))
         self.screen_width = int(self.cell_size * (self.traffic_simulation.width + 1))
@@ -85,7 +86,8 @@ class GameLoop:
 
     def draw_city(self, screen):
         self.drawGrid(screen)
-        self.drawCars(screen)
+        if self.draw_cars:
+            self.drawCars(screen)
         self.draw_intersection_elements(screen)
     
     def loop_gui(self):
@@ -100,10 +102,10 @@ class GameLoop:
             
             self.traffic_simulation.update_car_positions()
             
-            if self.traffic_simulation.done():
-                self.refresh(screen)
-                result = self.traffic_simulation.result()
-                break
+            # if self.traffic_simulation.done():
+            #     self.refresh(screen)
+            #     result = self.traffic_simulation.result()
+            #     break
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -113,6 +115,6 @@ class GameLoop:
         pygame.quit()
 
 if __name__ == "__main__":
-    gl = GameLoop()
-    gl.start()
+    view = SimulationView(TrafficSimulation(num_of_cars=5), draw_cars=True)
+    view.start()
     
