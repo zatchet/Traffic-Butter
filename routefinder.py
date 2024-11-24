@@ -31,10 +31,10 @@ class RouteFinder:
             elif isinstance(intersection, FourWayStopSign):
                 return FOUR_WAY_STOP_SIGN_COST  # Medium cost for stop signs
             elif isinstance(intersection, TwoWayStopSign):
-                if intersection.y_axis_free and direction in [Direction.up, Direction.down]:
+                if (intersection.y_axis_free) and (direction in [Direction.up, Direction.down]):
                     # can go straight through
                     return 0.0
-                if not intersection.y_axis_free and direction in [Direction.left, Direction.right]:
+                if (not intersection.y_axis_free) and (direction in [Direction.left, Direction.right]):
                     # can go straight through
                     return 0.0
                 else:

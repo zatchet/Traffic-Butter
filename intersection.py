@@ -19,6 +19,9 @@ class StopLight(Intersection):
         self.queues = {direction: [] for direction in Direction}
         self.duration_pattern = duration_pattern  # (y_axis_green seconds, y_axis_red seconds)
 
+    def __repr__(self):
+        return f"StopLight({self.duration_pattern})"
+
     def flip_light(self, ts):
         if ts.done():
             return
@@ -69,6 +72,9 @@ class FourWayStopSign(Intersection):
     def __init__(self):
         self.time_since_last_pass = 0
         self.cars_waiting = 0
+
+    def __repr__(self):
+        return f"FourWayStopSign()"
         
     def join(self, car_index, direction, next_direction, ts):
         self.cars_waiting += 1
@@ -87,6 +93,9 @@ class TwoWayStopSign(Intersection):
         else:
             # maintain two queues, one for each stop sign
             self.queues = {direction: [] for direction in [Direction.up, Direction.down]}
+
+    def __repr__(self):
+        return f"TwoWayStopSign({self.y_axis_free})"
     
     def join(self, car_index, direction, next_direction, ts):
         if direction in [Direction.up, Direction.down] and self.y_axis_free:

@@ -9,18 +9,21 @@ from intersection import StopLight, Intersection, TwoWayStopSign, FourWayStopSig
 from routefinder import RouteFinder
 from constants import *
 
-def random_intersection_placement(width: int, height: int) -> List[List[Intersection]]:
+def random_intersection():
+    random_intersection = random.choice([0, 1, 2])
+    if random_intersection == 0:
+        duration_pattern = (random.choice(POSSIBLE_LIGHT_DURATIONS), random.choice(POSSIBLE_LIGHT_DURATIONS))
+        return StopLight(duration_pattern)
+    elif random_intersection == 1:
+        return FourWayStopSign()
+    elif random_intersection == 2:
+        return TwoWayStopSign(y_axis_free=random.choice([True, False]))
+
+def random_matrix(width: int, height: int) -> List[List[Intersection]]:
     matrix = [[None for _ in range(width)] for _ in range(height)]
     for y in range(0, height):
         for x in range(0, width):
-            random_intersection = random.choice([0, 1, 2])
-            if random_intersection == 0:
-                duration_pattern = (random.choice(POSSIBLE_LIGHT_DURATIONS), random.choice(POSSIBLE_LIGHT_DURATIONS))
-                matrix[y][x] = StopLight(duration_pattern, y_axis_green_initial=True)
-            elif random_intersection == 1:
-                matrix[y][x] = FourWayStopSign()
-            elif random_intersection == 2:
-                matrix[y][x] = TwoWayStopSign(y_axis_free=random.choice([True, False]))
+            matrix[y][x] = random_intersection()
     return matrix 
 
 # Main logic for the Traffic Simulation 
@@ -28,7 +31,7 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
 class TrafficSimulation:
     def __init__(self, num_of_cars = None, origin_destination_pairs: List[Tuple[Pos, Pos]] = None, 
                  matrix: List[List[Intersection]] = None):
-        self.matrix = matrix or random_intersection_placement(DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT)
+        self.matrix = matrix or random_matrix(DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT)
         self.height = len(self.matrix)
         self.width = len(self.matrix[0])
         if self.height < 2 or self.width < 2:
@@ -37,12 +40,13 @@ class TrafficSimulation:
         if origin_destination_pairs and num_of_cars:
             raise Exception("Cannot specify both num_of_cars and origin_destination_pairs")
         elif origin_destination_pairs and len(origin_destination_pairs) > 0:
+            self.times = [math.inf]*len(origin_destination_pairs)
             self.cars = self.initialize_cars_from_pairs(origin_destination_pairs)
         elif num_of_cars and num_of_cars > 0:
+            self.times = [math.inf]*num_of_cars
             self.cars = self.randomize_cars(num_of_cars)
         else:
             raise Exception("Need to specify either non-zero num_of_cars for randomization or origin_destination_pairs")
-        self.times = [math.inf]*len(self.cars)
         self.setup_light_timers()
 
     # moves all cars which are currently free to move
