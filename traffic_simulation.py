@@ -15,7 +15,8 @@ def random_intersection_placement(width: int, height: int) -> List[List[Intersec
         for x in range(0, width):
             random_intersection = random.choice([0, 1, 2])
             if random_intersection == 0:
-                matrix[y][x] = StopLight(duration = random.choice(POSSIBLE_LIGHT_DURATIONS), y_axis_green=random.choice([True, False]))
+                duration_pattern = (random.choice(POSSIBLE_LIGHT_DURATIONS), random.choice(POSSIBLE_LIGHT_DURATIONS))
+                matrix[y][x] = StopLight(duration_pattern, y_axis_green_initial=True)
             elif random_intersection == 1:
                 matrix[y][x] = FourWayStopSign()
             elif random_intersection == 2:

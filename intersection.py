@@ -1,4 +1,5 @@
 import threading
+import random
 from direction import Direction
 from constants import *
 
@@ -13,12 +14,11 @@ class Intersection:
     pass
 
 class StopLight(Intersection):
-    def __init__(self, duration, y_axis_green):
-        self.y_axis_green = y_axis_green
+    def __init__(self, duration_pattern):
+        self.y_axis_green = random.choice([True, False])
         self.queues = {direction: [] for direction in Direction}
-        self.duration = duration
+        self.duration_pattern = duration_pattern  # (y_axis_green seconds, y_axis_red seconds)
 
-    # every duration seconds, flip the light
     def flip_light(self, ts):
         if ts.done():
             return
@@ -28,7 +28,8 @@ class StopLight(Intersection):
             raise Exception("Should never be more than 2 queues with cars")
         self.queues = {direction: [] for direction in Direction}
         start_timer(LIGHT_RELEASE_RATE, self.process_queues, kwargs={'ts': ts, 'queues': queues_to_be_processed})
-        start_timer(self.duration, self.flip_light, kwargs={'ts': ts})
+        flip_time = self.duration_pattern[0] if self.y_axis_green else self.duration_pattern[1]
+        start_timer(flip_time, self.flip_light, kwargs={'ts': ts})
     
     # release a car from each of the 2 queues every LIGHT_RELEASE_RATE seconds
     def process_queues(self, ts, queues):
