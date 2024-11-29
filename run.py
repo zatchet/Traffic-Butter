@@ -12,8 +12,6 @@ from simulation_view import SimulationView
 import os
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
-os.environ['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = "YES"  # Add this line
-
 
 GUI = True
 
@@ -104,11 +102,43 @@ def checkerboard_crossover(candidate1: List[List[Intersection]], candidate2: Lis
                 new_candidate[y].append(candidate2[y][x])
     return new_candidate
 
+def subsection_crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
+    # takes the middle subsection of candidate 1 and the rest from candidate 2
+    width = len(candidate1[0])
+    height = len(candidate1)
+    
+    # Calculate middle section boundaries (approximately 50% of grid)
+    # Special case for size 3: middle section should be just the center cell
+    # For other odd numbers like 7, we want about 40% of the grid
+    # For even numbers, we want about half
+    def get_start_pos(size):
+        if size == 3:
+            return 1
+        return (size - 1) // 3 if size % 2 == 1 else size // 4
+    
+    mid_width_start = get_start_pos(width)
+    mid_width_end = width - mid_width_start
+    mid_height_start = get_start_pos(height)
+    mid_height_end = height - mid_height_start
+    
+    new_candidate = []
+    for y in range(height):
+        new_candidate.append([])
+        for x in range(width):
+            if mid_width_start <= x < mid_width_end and mid_height_start <= y < mid_height_end:
+                new_candidate[y].append(candidate1[y][x])
+            else:
+                new_candidate[y].append(candidate2[y][x])
+    return new_candidate
+    
 def crossover(candidate1: List[List[Intersection]], candidate2: List[List[Intersection]]):
-    if random.random() < 0.5:
+    random_number = random.random()
+    if random_number < 0.25:
         return checkerboard_crossover(candidate1, candidate2)
-    else:
+    elif random_number < 0.5:
         return alternating_row_crossover(candidate1, candidate2)
+    else:
+        return subsection_crossover(candidate1, candidate2)
 
 def mutate(candidate: List[List[Intersection]]):
     mutated_candidate = candidate.copy()
@@ -166,7 +196,7 @@ def genetic_algorithm():
         generation_count = 0
         generations_without_improvement = 0
         best_from_this_restart = (None, float('inf'))
-        while True:
+        while generations_without_improvement < CONVERGENCE_THRESHOLD:
             print(f'Running simulations on generation {generation_count} of restart {i} with mutation rate {mutation_rate}. Best from this restart {best_from_this_restart[1]}, best overall {best_overall[1]}')
             results = collect_results(candidates)
             # print([result for candidate, result in results])
@@ -179,9 +209,6 @@ def genetic_algorithm():
                 generations_without_improvement = 0
             else:
                 generations_without_improvement += 1
-                if generations_without_improvement >= CONVERGENCE_THRESHOLD:
-                    print('arrived at local optimum, restarting from scratch')
-                    break
             candidates = get_new_candidates(survivors, mutation_rate)
             mutation_rate *= MUTATION_DECAY_RATE
             generation_count += 1
