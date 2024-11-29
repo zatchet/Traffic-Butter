@@ -163,7 +163,7 @@ def mutate(candidate: List[List[Intersection]]):
             mutated_candidate[y][x] = TwoWayStopSign(new_y_axis_free)
     return mutated_candidate
 
-def get_new_candidates(survivors: List[List[Intersection]], mutation_rate: float):
+def get_new_candidates(survivors: List[List[List[Intersection]]], mutation_rate: float):
     new_candidates = []
     for candidate in survivors:
         other_candidate = random.choice([c for c in survivors if c != candidate])
