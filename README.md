@@ -1,10 +1,43 @@
-# ai-traffic-sim
-Formal Overview Proposal:
-https://docs.google.com/document/d/1kPueS_Ql8CbXBit2DE1Fq0ncjcYjq4GfdS0BgRNk-P8/edit
+#  Traffic Butter: Genetic-Based Traffic Flow Optimization
 
-In a block box environment, we give the simulation inupts and use AI techniques like Simulated Annealing, Random Restarts, and Stochastic Gradient to find the optimal solution.
+## Overview
 
-The internals of this game are built in the GUI pygame and the internal logic is done in Python. 
+This project provides a systematic strategy for optimizing the placement and configuration of various traffic measures in a simulated urban environment. We use a genetic algorithm with crossovers and mutations to iteratively find optimal configurations over many generations.
+ 
+## Document Overview
+- run.py: the genetic algorithm itself
+- traffic_simulation.py: the implementation of the environment
+- simulation_view.py: the GUI
+- routefinder.py: the A* route-finding
+  
+## Getting Started
 
-A Traffic Simulation: Specifications for the simulation.
-https://docs.google.com/document/d/1MCi6aUgOgi8WNEJgD7ugnmPVdYxF_B4DG3NS7FiggiI/edit
+### Prerequisites
+
+Ensure you have the following installed to run the front end application
+- Python 3.10+
+- pygame
+
+### Installation
+#### Only follow these steps if you wish to run the front end application locally. 
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/ai-traffic-sim.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd ai-traffic-sim
+   ```
+
+3. Install the required packages:
+   ```bash
+   pip install pygame
+   ```
+4. Set constants and hyper-parameters as desired in `constants.py` and at the top of `run.py`
+
+5. Run the algorithm:
+   ```bash
+   python3 run.py
+   ```
