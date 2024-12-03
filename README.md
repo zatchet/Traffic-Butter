@@ -1,5 +1,7 @@
 #  Traffic Butter: Genetic-Based Traffic Flow Optimization
 
+See presentation [here](slides.pdf).
+
 ## Overview
 
 This project provides a systematic strategy for optimizing the placement and configuration of various traffic measures in a simulated urban environment. We use a genetic algorithm with crossovers and mutations to iteratively find optimal configurations over many generations.
