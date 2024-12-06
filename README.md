@@ -22,7 +22,9 @@ Ensure you have the following installed to run the front end application
 
 ### Usage
 
-```bash
-pip install pygame
-python3 run.py
-```
+1. Set constants and hyper-parameters as desired in `constants.py` and at the top of `run.py`
+
+2. ```bash
+   pip install pygame
+   python3 run.py
+   ```
