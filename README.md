@@ -20,26 +20,9 @@ Ensure you have the following installed to run the front end application
 - Python 3.10+
 - pygame
 
-### Installation
-#### Only follow these steps if you wish to run the front end application locally. 
+### Usage
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/ai-traffic-sim.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
-   cd ai-traffic-sim
-   ```
-
-3. Install the required packages:
-   ```bash
-   pip install pygame
-   ```
-4. Set constants and hyper-parameters as desired in `constants.py` and at the top of `run.py`
-
-5. Run the algorithm:
-   ```bash
-   python3 run.py
-   ```
+```bash
+pip install pygame
+python3 run.py
+```
